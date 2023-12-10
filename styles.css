@@ -1,0 +1,25 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+
+#media-notes-container {
+	background: #000;
+}
+
+.youtube-iframe {
+	height: 100%;
+	width: 100%;
+	max-width: 640px;
+	display: block;
+	margin: 0 auto;
+}
+
+.youtube-container {
+	height: 100%;
+	width: 100%;
+}
