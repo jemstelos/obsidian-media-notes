@@ -1,29 +1,36 @@
 import * as React from "react";
-import YouTube from "react-youtube";
+import YouTube, { YouTubeProps } from "react-youtube";
+
+const getVideoId = (url: string) => {
+	const urlParams = new URLSearchParams(new URL(url).search);
+	return urlParams.get("v");
+};
 
 export const MediaFrame: React.FC<{
 	mediaLink: string;
-	ytRef: React.Ref<YouTube>;
-}> = ({ mediaLink, ytRef }) => {
-	const getVideoId = (url: string) => {
-		const urlParams = new URLSearchParams(new URL(url).search);
-		return urlParams.get("v");
-	};
-
+	ytRef: React.RefObject<YouTube>;
+	initSeconds: number;
+}> = ({ mediaLink, ytRef, initSeconds }) => {
 	const videoId = getVideoId(mediaLink);
-	console.log("videoId", videoId);
+	if (!videoId) return null;
+
+	const opts: YouTubeProps["opts"] = {
+		playerVars: {
+			start: initSeconds ?? undefined,
+		},
+	};
+	// const intervalRef = React.useRef<number | undefined>(undefined);
 
 	return (
-		<div className="youtube-container">
+		<div className="media-container">
 			<YouTube
 				ref={ytRef}
-				className="youtube-iframe w-full"
-				iframeClassName={`w-full rounded-xl youtube-iframe`}
+				className="youtube-iframe"
+				iframeClassName={`youtube-iframe`}
 				videoId={videoId}
-				// onStateChange={onStateChange}
+				opts={opts}
 				onReady={(event) => {
 					console.log("ready youtube");
-					// console.log(ytRef.current);
 				}}
 			/>
 		</div>

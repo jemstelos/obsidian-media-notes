@@ -7,8 +7,10 @@ If your plugin does not need CSS, delete this file.
 
 */
 
-#media-notes-container {
-	background: #000;
+.media-notes-container {
+	background: rgba(0, 0, 0, 0.1);
+	height: 30%;
+	/* padding: 10px 0; */
 }
 
 .youtube-iframe {
@@ -19,7 +21,26 @@ If your plugin does not need CSS, delete this file.
 	margin: 0 auto;
 }
 
-.youtube-container {
+.media-container {
 	height: 100%;
 	width: 100%;
+}
+
+.media-container-parent-horizontal .markdown-source-view {
+	flex-direction: row !important;
+}
+
+.media-container-parent-horizontal .media-notes-container {
+	height: 100%;
+	width: 900px;
+}
+
+.media-container-parent-horizontal .media-container {
+	max-height: 80%;
+	margin: auto;
+	width: 100%;
+}
+
+.media-container-parent-horizontal .youtube-iframe {
+	max-width: none;
 }
