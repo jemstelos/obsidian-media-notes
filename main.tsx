@@ -442,7 +442,7 @@ class SettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName("Default Orientation")
+			.setName("Default orientation")
 			.setDesc(
 				"Vertical or horizontal player view. Defaults to vertical."
 			)
@@ -466,7 +466,7 @@ class SettingsTab extends PluginSettingTab {
 			});
 
 		new Setting(containerEl)
-			.setName("Rewind & Fast Forward Seconds")
+			.setName("Rewind & fast forward seconds")
 			.setDesc("Number of seconds to rewind/fast forward")
 			.addSlider((slider) =>
 				slider
@@ -480,7 +480,7 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Default Vertical Player Height (%)")
+			.setName("Default vertical player height (%)")
 			.setDesc(
 				"The height of the player as a percentage of the viewport in vertical mode."
 			)
@@ -496,7 +496,7 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Default Horizontal Player Width (%)")
+			.setName("Default horizontal player width (%)")
 			.setDesc(
 				"The width of the player as a percentage of the viewport in horizontal mode."
 			)
@@ -528,7 +528,7 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Insert Timestamp Template")
+			.setName("Insert timestamp template")
 			.setDesc(
 				"The template used for inserting the timestamp with the 'Insert Timestamp' command. Use '{ts}' as a placeholder for the timestamp."
 			)
@@ -542,7 +542,7 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Video Player Background")
+			.setName("Video player background")
 			.setDesc(
 				"Background color for the video player. e.g #dddddd or rgba(0, 0, 0, 0.8)"
 			)
@@ -580,7 +580,7 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Show current timestamp above progress bar")
+			.setName("Show current timestamp")
 			.setDesc(
 				"Display current timestamp. Default is to only show when seeking."
 			)
