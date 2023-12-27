@@ -9,21 +9,27 @@ If your plugin does not need CSS, delete this file.
 
 .media-notes-container {
 	background: rgba(0, 0, 0, 0.1);
-	height: 30%;
+	/* height: 30%; */
 	/* padding: 10px 0; */
 }
 
 .youtube-iframe {
 	height: 100%;
 	width: 100%;
-	max-width: 640px;
-	display: block;
-	margin: 0 auto;
+}
+
+.media-top-container {
+	height: 100%;
+	width: 100%;
 }
 
 .media-container {
 	height: 100%;
 	width: 100%;
+	position: relative;
+	max-width: 640px;
+	display: block;
+	margin: 0 auto;
 }
 
 .media-container-parent-horizontal .markdown-source-view {
@@ -32,15 +38,51 @@ If your plugin does not need CSS, delete this file.
 
 .media-container-parent-horizontal .media-notes-container {
 	height: 100%;
-	width: 900px;
+	/* width: 50%; */
 }
 
 .media-container-parent-horizontal .media-container {
-	max-height: 80%;
 	margin: auto;
 	width: 100%;
+	max-width: none;
 }
 
 .media-container-parent-horizontal .youtube-iframe {
 	max-width: none;
+}
+
+.media-container:hover .progress-bar-container {
+	display: none;
+}
+
+.progress-bar-container {
+	position: absolute;
+	bottom: 0;
+	margin: 0 auto;
+	width: 100%;
+	height: 3px;
+	background-color: rgba(255, 255, 255, 0.1);
+}
+.timestamp {
+	position: absolute;
+	bottom: 5px;
+	left: 2px;
+	padding: 0 10px;
+	font-size: 10px;
+	color: rgba(255, 255, 255, 0.7);
+	border-radius: 3px;
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.progress-bar {
+	position: absolute;
+	left: 0;
+	top: 0;
+	/* margin-left: 12px;
+	margin-right: 12px; */
+	height: 100%;
+}
+
+.hidden {
+	display: none;
 }
