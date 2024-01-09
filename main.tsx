@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import { MediaFrame } from "./components/media-frame";
-import { AppProvider, settingsEventEmitter } from "./app-context";
+import { AppProvider } from "./app-context";
 import {
 	App,
 	Editor,
@@ -14,6 +14,7 @@ import {
 import * as React from "react";
 import YouTube from "react-youtube";
 import { createClickHandlerPlugin } from "viewPlugin";
+import { EventEmitter } from "events";
 
 export interface MyPluginSettings {
 	seekSeconds: number;
@@ -25,7 +26,7 @@ export interface MyPluginSettings {
 	progressBarColor: string;
 	displayProgressBar: boolean;
 	displayTimestamp: boolean;
-	defaultViewHorizontal: "Horizontal" | "Vertical";
+	defaultSplitMode: "Horizontal" | "Vertical";
 	mediaData: {
 		[id: string]: {
 			mediaLink: string;
@@ -39,7 +40,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	seekSeconds: 10,
 	verticalPlayerHeight: 25,
 	horizontalPlayerWidth: 50,
-	defaultViewHorizontal: "Vertical",
+	defaultSplitMode: "Vertical",
 	displayProgressBar: true,
 	displayTimestamp: true,
 	timestampOffsetSeconds: 5,
@@ -50,7 +51,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 };
 
 const mediaNotesContainerClass = "media-notes-container";
-const mediaParentContainerHorizontalClass = "media-container-parent-horizontal";
+const mediaParentContainerVerticalClass = "media-container-parent-vertical";
 
 export const formatTimestamp = (timestamp: number | undefined) => {
 	if (timestamp === undefined) return "";
@@ -84,7 +85,11 @@ export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
 
 	players: {
-		[id: string]: { ytRef: React.RefObject<YouTube>; mediaLink: string };
+		[id: string]: {
+			ytRef: React.RefObject<YouTube>;
+			mediaLink: string;
+			eventEmitter: EventEmitter;
+		};
 	};
 
 	getActiveViewYoutubePlayer = (view: View) => {
@@ -120,6 +125,7 @@ export default class MyPlugin extends Plugin {
 	renderPlayerInView = (markdownView: MarkdownView) => {
 		const frontmatter = (parseYaml(markdownView.rawFrontmatter) ??
 			{}) as Record<string, string>;
+		// if there's a media_link
 		if (frontmatter && frontmatter["media_link"]) {
 			const container = markdownView.containerEl;
 			const existingPlayerComponent = container.querySelector(
@@ -153,11 +159,11 @@ export default class MyPlugin extends Plugin {
 			const markdownSourceview = container.querySelector(
 				".markdown-source-view"
 			);
-			if (this.settings.defaultViewHorizontal === "Horizontal") {
+			if (this.settings.defaultSplitMode === "Vertical") {
 				div.style.width = this.settings.horizontalPlayerWidth + "%";
-				container.classList.add(mediaParentContainerHorizontalClass);
+				container.classList.add(mediaParentContainerVerticalClass);
 			} else {
-				container.classList.remove(mediaParentContainerHorizontalClass);
+				container.classList.remove(mediaParentContainerVerticalClass);
 				div.style.height = this.settings.verticalPlayerHeight + "%";
 			}
 
@@ -166,9 +172,11 @@ export default class MyPlugin extends Plugin {
 
 			const mediaLink = frontmatter["media_link"];
 			const ytRef = React.createRef<YouTube>();
+			const eventEmitter = new EventEmitter();
 			this.players[uniqueId] = {
 				ytRef,
 				mediaLink: mediaLink,
+				eventEmitter,
 			};
 
 			// media data is indexed by media link
@@ -178,7 +186,10 @@ export default class MyPlugin extends Plugin {
 			const root = createRoot(div);
 			root.render(
 				<>
-					<AppProvider value={{ settings: this.settings }}>
+					<AppProvider
+						settingsParam={this.settings}
+						eventEmitter={eventEmitter}
+					>
 						<MediaFrame
 							mediaLink={String(mediaLink)}
 							ytRef={ytRef}
@@ -188,6 +199,7 @@ export default class MyPlugin extends Plugin {
 				</>
 			);
 		} else {
+			// if there's no media_link, cleanup
 			const container = markdownView.containerEl;
 			// cleanup existing players, and save timestamp
 			const div = container.querySelector("." + mediaNotesContainerClass);
@@ -209,6 +221,7 @@ export default class MyPlugin extends Plugin {
 
 		const seconds = convertTimestampToSeconds(timestamp);
 		player.ytRef.current?.getInternalPlayer()?.seekTo(seconds, true);
+		player.eventEmitter.emit("showTimestamp");
 		return true;
 	};
 
@@ -267,7 +280,7 @@ export default class MyPlugin extends Plugin {
 
 		this.addCommand({
 			id: "mn-toggle-horizontal-view",
-			name: "Toggle horizontal/vertical",
+			name: "Toggle horizontal/vertical split",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const player = this.getActiveViewYoutubePlayer(view);
 				if (!player || !player.ytRef) return;
@@ -278,7 +291,7 @@ export default class MyPlugin extends Plugin {
 				) as HTMLElement;
 				if (
 					container.classList.contains(
-						mediaParentContainerHorizontalClass
+						mediaParentContainerVerticalClass
 					)
 				) {
 					if (existingPlayer) {
@@ -287,7 +300,7 @@ export default class MyPlugin extends Plugin {
 						existingPlayer.style.width = "100%";
 					}
 					container.classList.remove(
-						mediaParentContainerHorizontalClass
+						mediaParentContainerVerticalClass
 					);
 				} else {
 					if (existingPlayer) {
@@ -295,9 +308,7 @@ export default class MyPlugin extends Plugin {
 							this.settings.horizontalPlayerWidth + "%";
 						existingPlayer.style.height = "100%";
 					}
-					container.classList.add(
-						mediaParentContainerHorizontalClass
-					);
+					container.classList.add(mediaParentContainerVerticalClass);
 				}
 			},
 		});
@@ -315,6 +326,8 @@ export default class MyPlugin extends Plugin {
 				player.ytRef.current
 					?.getInternalPlayer()
 					?.seekTo(newTime, true);
+
+				player.eventEmitter.emit("showTimestamp");
 			},
 		});
 
@@ -331,6 +344,7 @@ export default class MyPlugin extends Plugin {
 				player.ytRef.current
 					?.getInternalPlayer()
 					?.seekTo(newTime, true);
+				player.eventEmitter.emit("showTimestamp");
 				// player.ytRef.current?.getInternalPlayer()?.showVideoInfo();
 				// TODO: this isn't working - don't think i can simulate a mousemove to the iframe
 				const existingPlayer = view.containerEl.querySelector(
@@ -354,7 +368,14 @@ export default class MyPlugin extends Plugin {
 				console.log("layout changed");
 				const markdownView =
 					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (!markdownView) return;
+				if (!markdownView) {
+					console.log("active view has been closed");
+					// since we don't have the view anymore, trigger a save on all the players in state
+					Object.keys(this.players).forEach((id) => {
+						this.savePlayerTimestamp(id);
+					});
+					return;
+				}
 				this.renderPlayerInView(markdownView);
 			})
 		);
@@ -424,7 +445,9 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-		settingsEventEmitter.emit("settingsUpdated", this.settings);
+		Object.values(this.players).forEach((player) => {
+			player.eventEmitter.emit("settingsUpdated", this.settings);
+		});
 	}
 }
 
@@ -442,12 +465,12 @@ class SettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName("Default orientation")
+			.setName("Default Split View")
 			.setDesc(
-				"Vertical or horizontal player view. Defaults to vertical."
+				"Vertical or horizontal split view. Defaults to horizontal."
 			)
 			.addDropdown((dropdown) => {
-				console.log(this.plugin.settings.defaultViewHorizontal);
+				console.log(this.plugin.settings.defaultSplitMode);
 
 				// dropdown.setValue(this.plugin.settings.defaultViewHorizontal);
 				dropdown
@@ -455,12 +478,11 @@ class SettingsTab extends PluginSettingTab {
 						Vertical: "Vertical",
 						Horizontal: "Horizontal",
 					})
-					.setValue(this.plugin.settings.defaultViewHorizontal)
+					.setValue(this.plugin.settings.defaultSplitMode)
 					.onChange(async (value) => {
-						this.plugin.settings.defaultViewHorizontal = value as
+						this.plugin.settings.defaultSplitMode = value as
 							| "Vertical"
 							| "Horizontal";
-						console.log(value);
 						await this.plugin.saveSettings();
 					});
 			});
@@ -480,9 +502,9 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Default vertical player height (%)")
+			.setName("Player height (%) in horizontal-split mode")
 			.setDesc(
-				"The height of the player as a percentage of the viewport in vertical mode."
+				"The height of the player as a percentage of the viewport in horizontal-split mode."
 			)
 			.addSlider((slider) =>
 				slider
@@ -496,9 +518,9 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Default horizontal player width (%)")
+			.setName("Player width (%) in vertical-split mode")
 			.setDesc(
-				"The width of the player as a percentage of the viewport in horizontal mode."
+				"The width of the player as a percentage of the viewport in vertical-split mode."
 			)
 			.addSlider((slider) =>
 				slider
@@ -514,7 +536,7 @@ class SettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Timestamp offset seconds")
 			.setDesc(
-				"Number of seconds in the past to offset the timestamp by."
+				"Number of seconds in the past to offset the inserted timestamp by."
 			)
 			.addSlider((slider) =>
 				slider
@@ -580,9 +602,9 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Show current timestamp")
+			.setName("Always display current timestamp")
 			.setDesc(
-				"Display current timestamp. Default is to only show when seeking."
+				"Always display the current timestamp. Default behavior is to only show it when seeking."
 			)
 			.addToggle((val) =>
 				val

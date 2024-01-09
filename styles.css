@@ -32,22 +32,22 @@ If your plugin does not need CSS, delete this file.
 	margin: 0 auto;
 }
 
-.media-container-parent-horizontal .markdown-source-view {
+.media-container-parent-vertical .markdown-source-view {
 	flex-direction: row !important;
 }
 
-.media-container-parent-horizontal .media-notes-container {
+.media-container-parent-vertical .media-notes-container {
 	height: 100%;
 	/* width: 50%; */
 }
 
-.media-container-parent-horizontal .media-container {
+.media-container-parent-vertical .media-container {
 	margin: auto;
 	width: 100%;
 	max-width: none;
 }
 
-.media-container-parent-horizontal .youtube-iframe {
+.media-container-parent-vertical .youtube-iframe {
 	max-width: none;
 }
 
@@ -65,12 +65,19 @@ If your plugin does not need CSS, delete this file.
 }
 .timestamp {
 	position: absolute;
-	bottom: 5px;
-	left: 2px;
-	padding: 0 10px;
-	font-size: 10px;
-	color: rgba(255, 255, 255, 0.7);
-	border-radius: 3px;
+	bottom: 7px;
+	display: flex;
+	margin: 0 8px;
+	justify-content: start;
+	width: 100%;
+	opacity: 1;
+}
+
+.timestamp-inner {
+	padding: 0 6px;
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.8);
+	border-radius: 7px;
 	background-color: rgba(0, 0, 0, 0.2);
 }
 
@@ -84,5 +91,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 .hidden {
-	display: none;
+	opacity: 0;
+	transition: opacity 0.2s ease-out;
+	/* display: none; */
 }

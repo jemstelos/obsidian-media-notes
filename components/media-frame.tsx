@@ -96,17 +96,25 @@ export const MediaFrame: React.FC<{
 				/>
 				<div
 					className={`progress-bar-container ${
-						hideProgressBar || !context?.settings.displayProgressBar
+						hideProgressBar ||
+						!context?.settings?.displayProgressBar
 							? "hidden"
 							: ""
 					}`}
 				>
 					<div
 						className={`timestamp ${
-							!context?.settings?.displayTimestamp ? "hidden" : ""
+							!(
+								context?.settings?.displayTimestamp ||
+								context?.showTimestamp
+							)
+								? "hidden"
+								: ""
 						}`}
 					>
-						{formatTimestamp(currentTimestamp)}
+						<div className="timestamp-inner">
+							{formatTimestamp(currentTimestamp)}
+						</div>
 					</div>
 					<div
 						className={`progress-bar`}

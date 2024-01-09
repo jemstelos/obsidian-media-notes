@@ -1,5 +1,4 @@
 import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
-import { App, View } from "obsidian";
 
 class ClickHandlerPlugin {
 	view: EditorView;
