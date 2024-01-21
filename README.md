@@ -1,96 +1,79 @@
-# Obsidian Sample Plugin
+# Obsidian Media Notes
+This plugin aims to provide a best-in-class experience for audio and video note-taking. 
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Capture and replay the best insights from podcasts and lecture on YouTube, integrated directly into your second brain. 
 
-This project uses Typescript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+- **Media Control Hotkeys** - Pause and skip forward/back without breaking your notetaking flow
+- **Embedded Timestamps** - Insert clickable timestamp links to jump back to key moments
+- **Resume Playback** - Come back later and pick up from wherever you left off
+- **Focused Learning Environment** - Take video notes surrounded by your knowledge, not a content feed
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+TODO: IMAGE GIF
+## Installation
+This is a community plugin for Obsidian. Read more about how installing and using Obsidian Plugins [here](https://help.obsidian.md/Extending+Obsidian/Community+plugins).
+Search "Media Notes" in the Community Plugins library to locate this plugin and add it.
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+## Documentation
+A media note is just a markdown note with a  `media_link` property that contains a supported URL format (e.g  a YouTube link).
 
-## First time developing plugins?
+```
+---
+  media_link: https://www.youtube.com/watch?v=MFXWY8TqSWw
+---
 
-Quick starting guide for new plugin devs:
-
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
-
-## Releasing new releases
-
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
-
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check https://github.com/obsidianmd/obsidian-releases/blob/master/plugin-review.md
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+[02:01]() - A useful insight, ties to my thought that [[Connections are key to creativity.]]
 ```
 
-If you have multiple URLs, you can also do:
+Media notes display an embedded player fixed in the note pane, so that the note content can be scrolled while viewing the player.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+Timestamps are inserted into the note as markdown links with a timestamp format:
+`[3:05:53]()`
 
-## API Documentation
+Clicking links that have the timestamp format (`HH:MM:SS`) will jump the playback time for the note's media player to that timestamp.
 
-See https://github.com/obsidianmd/obsidian-api
+## Usage
+
+### Create a media note
+A media note is just a markdown note with a valid `media_link` property.
+
+The simplest way to turn a note into a media note is to use the `Add file property` command, then type in `media_link` and paste your URL:
+
+More advanced users may want to create a Templater template for media notes that prompts for the meda_link URL.
+
+### One-Click Media Note from YouTube
+For a smoother workflow to create media notes from a Youtube page in your browser, you can use the following bookmarklet.
+
+A bookmarklet is a browser bookmark that runs a code snippet. In this case, it takes the url and title of the current page and constructs a URI link for Obsidian's create note method. The note created has the media_link already inserted, and the page title in the note title.
+
+### Media Controls
+One of the main benefits of this plugin is the ability to assign hotkeys to media controls, so that you can control the playback of the content you're taking notes on without leaving your note.
+
+- Play/Pause
+- Seek Forward
+- Seek Backward
+
+Media controls can be bound to any hotkey you like through the Hotkeys settings page.
+
+### Inserting and using Timestamps
+Timestamps can be inserted using the `Insert Timestamp` command, which can be bound to a hotkey for seamlessly capturing important snippets. An offset is configurable as you typically want to make a note on a point that was made a few seconds in the past.
+
+Clicking links that have the timestamp format (`HH:MM:SS`) will jump the playback time for the note's media player to that timestamp.
+
+## Settings
+A number of settings are provided for you to customize the viewing and note-taking experience, including:
+
+- Vertical/Horizontal Player Mode  - this sets the default viewing behavior, you can still toggle the mode for any given note
+- Player Size 
+- Progress Bar Visibility + Color
+- Timestamp offset - you typically want to make a note on a point that was made a few seconds in the past
+- Timestamp template - you may want to insert timestamps with a space at the end or the beginning, depending on your workflow
+
+## Roadmap
+- [ ] Support jumping to timestamp links using keyboard shortcuts (e.g alt+enter)
+- [ ] Support for jumping to timestamp link via 
+- [ ] Drag to resize media player frame
+
+## Support
+If you receive value from this plugin and would like to support the work as well as its continued future development, please consider contributing a donation:
+
+<a href="https://www.buymeacoffee.com/jemstelos"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=❤️&slug=jemstelos&button_colour=5F7FFF&font_colour=ffffff&font_family=Inter&outline_colour=000000&coffee_colour=FFDD00" /></a>

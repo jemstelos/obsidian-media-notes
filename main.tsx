@@ -536,7 +536,7 @@ class SettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Timestamp offset seconds")
 			.setDesc(
-				"Number of seconds in the past to offset the inserted timestamp by."
+				"Number of seconds in the past to offset by when inserting the timestamp."
 			)
 			.addSlider((slider) =>
 				slider
@@ -550,9 +550,9 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Insert timestamp template")
+			.setName("Timestamp template")
 			.setDesc(
-				"The template used for inserting the timestamp with the 'Insert Timestamp' command. Use '{ts}' as a placeholder for the timestamp."
+				"The template used for inserting a timestamp into the editor. Use '{ts}' as a placeholder for the timestamp."
 			)
 			.addText((text) =>
 				text
@@ -578,8 +578,8 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Show media progress bar")
-			.setDesc("Display a media progress bar")
+			.setName("Show progress bar")
+			.setDesc("Display a progress bar for the elapsed time")
 			.addToggle((val) =>
 				val
 					.setValue(this.plugin.settings.displayProgressBar)
