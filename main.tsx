@@ -179,7 +179,6 @@ export default class MyPlugin extends Plugin {
 				eventEmitter,
 			};
 
-			// media data is indexed by media link
 			const mediaData = this.settings.mediaData[mediaLink];
 			const initSeconds = mediaData?.lastTimestampSeconds ?? 0;
 
