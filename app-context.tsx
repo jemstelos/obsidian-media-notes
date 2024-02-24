@@ -7,6 +7,10 @@ import { EventEmitter } from "events";
 interface ContextType {
 	settings: MyPluginSettings | null;
 	showTimestamp: boolean;
+	showSeekForward: boolean;
+	showSeekBackwards: boolean;
+	showPlay: boolean;
+	showPause: boolean;
 }
 
 // Create the context with initial value as null
@@ -26,6 +30,10 @@ export const AppProvider: React.FC<{
 	};
 
 	const [showTimestamp, setShowTimestamp] = useState<boolean>(false);
+	const [showSeekForward, setShowSeekForward] = useState<boolean>(false);
+	const [showSeekBackwards, setShowSeekBackwards] = useState<boolean>(false);
+	const [showPlay, setShowPlay] = useState<boolean>(false);
+	const [showPause, setShowPause] = useState<boolean>(false);
 
 	useEffect(() => {
 		// Listen for the 'settingsUpdated' event
@@ -33,28 +41,69 @@ export const AppProvider: React.FC<{
 			updateSettings(newSettings)
 		);
 
-		let debounceTimer: number;
-		const handleShowTimestamp = () => {
+		let timestampDebounceTimer: number;
+		let playPauseDebounceTimer: number;
+		const handleShowTimestamp = ({ type }: { type: string }) => {
 			// Clear the previous timer if there is one
-			clearTimeout(debounceTimer);
-			setShowTimestamp(true);
-			// Set a new timer to hide the timestamp
-			debounceTimer = window.setTimeout(() => {
-				setShowTimestamp(false);
-			}, 2000);
+			clearTimeout(timestampDebounceTimer);
+			clearTimeout(playPauseDebounceTimer);
+
+			setShowSeekForward(false);
+			// set them all to false again so that we can then set things to true again and get the animation
+			setShowTimestamp(false);
+			setShowSeekBackwards(false);
+			setShowPause(false);
+			setShowPause(false);
+
+			// slight setTimeout to get the state set on the next tick
+			setTimeout(() => {
+				setShowTimestamp(true);
+				if (type === "seekForward") {
+					setShowSeekForward(true);
+				}
+				if (type === "seekBackwards") {
+					setShowSeekBackwards(true);
+				}
+				if (type === "play") {
+					setShowPlay(true);
+				}
+				if (type === "pause") {
+					setShowPause(true);
+				}
+				// Set a new timer to hide the timestamp
+				timestampDebounceTimer = window.setTimeout(() => {
+					console.log("debounced setting to false");
+					setShowTimestamp(false);
+					setShowSeekForward(false);
+					setShowSeekBackwards(false);
+				}, 1500);
+				playPauseDebounceTimer = window.setTimeout(() => {
+					setShowPlay(false);
+					setShowPause(false);
+				}, 500);
+			}, 20);
 		};
 
-		eventEmitter.on("showTimestamp", handleShowTimestamp);
+		eventEmitter.on("handleAction", handleShowTimestamp);
 
 		// Clean up the listener when the component unmounts
 		return () => {
 			eventEmitter.off("settingsUpdated", updateSettings);
-			clearTimeout(debounceTimer);
+			clearTimeout(timestampDebounceTimer);
 		};
 	}, []);
 
 	return (
-		<AppContext.Provider value={{ settings, showTimestamp }}>
+		<AppContext.Provider
+			value={{
+				settings,
+				showTimestamp,
+				showSeekBackwards,
+				showSeekForward,
+				showPause,
+				showPlay,
+			}}
+		>
 			{children}
 		</AppContext.Provider>
 	);

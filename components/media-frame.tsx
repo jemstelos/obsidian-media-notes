@@ -2,6 +2,7 @@ import { useAppContext } from "app-context";
 import { formatTimestamp } from "main";
 import * as React from "react";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
+import { CSSTransition } from "react-transition-group";
 
 const getVideoId = (url: string) => {
 	const urlParams = new URLSearchParams(new URL(url).search);
@@ -79,6 +80,17 @@ export const MediaFrame: React.FC<{
 
 	const context = useAppContext();
 
+	React.useEffect(() => {
+		if (context?.showTimestamp) {
+			updateTimestamp();
+		}
+	}, [context?.showTimestamp]);
+
+	const seekBackRef = React.useRef(null);
+	const seekForwardRef = React.useRef(null);
+	const playRef = React.useRef(null);
+	const pauseRef = React.useRef(null);
+
 	return (
 		<div className="media-top-container">
 			<div className="media-container">
@@ -94,6 +106,104 @@ export const MediaFrame: React.FC<{
 						setMaxTime(duration);
 					}}
 				/>
+				<CSSTransition
+					nodeRef={playRef}
+					in={context?.showPlay}
+					timeout={15000}
+					classNames="playpause-icon"
+					mountOnEnter={true}
+					unmountOnExit={true}
+				>
+					<div className="playpause-container">
+						<div ref={playRef} className="play-icon">
+							<svg
+								viewBox="0 0 50 50"
+								height="45"
+								width="45"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<polygon
+									fill="white"
+									points="15,10 40,25 15,40"
+								></polygon>
+							</svg>
+						</div>
+					</div>
+				</CSSTransition>
+				<CSSTransition
+					nodeRef={pauseRef}
+					in={context?.showPause}
+					timeout={15000}
+					classNames="playpause-icon"
+					mountOnEnter={true}
+					unmountOnExit={true}
+				>
+					<div className="playpause-container">
+						<div ref={pauseRef} className="pause-icon">
+							<svg
+								viewBox="0 0 50 50"
+								height="50"
+								width="50"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<rect
+									fill="white"
+									height="30"
+									width="7"
+									y="10"
+									x="14"
+								></rect>
+								<rect
+									fill="white"
+									height="30"
+									width="7"
+									y="10"
+									x="29"
+								></rect>
+							</svg>
+						</div>
+					</div>
+				</CSSTransition>
+				<CSSTransition
+					nodeRef={seekBackRef}
+					in={context?.showSeekBackwards}
+					timeout={500}
+					classNames="seek-icon"
+					mountOnEnter={true}
+					unmountOnExit={true}
+				>
+					<div ref={seekBackRef} className="seek-backwards">
+						<div className="round">
+							<div id="cta">
+								<span className="arrow bounceAlphaBack primera back "></span>
+								<span className="arrow bounceAlphaBack segunda back "></span>
+								<div className="text">
+									{context?.settings?.seekSeconds}s
+								</div>
+							</div>
+						</div>
+					</div>
+				</CSSTransition>
+				<CSSTransition
+					nodeRef={seekForwardRef}
+					in={context?.showSeekForward}
+					timeout={500}
+					classNames="seek-icon"
+					mountOnEnter={true}
+					unmountOnExit={true}
+				>
+					<div ref={seekForwardRef} className="seek-forwards">
+						<div className="round">
+							<div id="cta">
+								<span className="arrow bounceAlpha segunda next "></span>
+								<span className="arrow bounceAlpha primera next "></span>
+								<div className="text">
+									{context?.settings?.seekSeconds}s
+								</div>
+							</div>
+						</div>
+					</div>
+				</CSSTransition>
 				<div
 					className={`progress-bar-container ${
 						hideProgressBar ||

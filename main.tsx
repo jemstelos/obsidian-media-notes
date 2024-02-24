@@ -220,7 +220,9 @@ export default class MyPlugin extends Plugin {
 
 		const seconds = convertTimestampToSeconds(timestamp);
 		player.ytRef.current?.getInternalPlayer()?.seekTo(seconds, true);
-		player.eventEmitter.emit("showTimestamp");
+		player.eventEmitter.emit("handleAction", {
+			type: "timestampClick",
+		});
 		return true;
 	};
 
@@ -271,9 +273,15 @@ export default class MyPlugin extends Plugin {
 					await player.ytRef.current?.internalPlayer?.getPlayerState();
 				if (playerState === YouTube.PlayerState.PLAYING) {
 					player.ytRef.current?.getInternalPlayer()?.pauseVideo();
+					player.eventEmitter.emit("handleAction", {
+						type: "pause",
+					});
 					return;
 				}
 				player.ytRef.current?.getInternalPlayer()?.playVideo();
+				player.eventEmitter.emit("handleAction", {
+					type: "play",
+				});
 			},
 		});
 
@@ -325,8 +333,9 @@ export default class MyPlugin extends Plugin {
 				player.ytRef.current
 					?.getInternalPlayer()
 					?.seekTo(newTime, true);
-
-				player.eventEmitter.emit("showTimestamp");
+				player.eventEmitter.emit("handleAction", {
+					type: "seekForward",
+				});
 			},
 		});
 
@@ -343,7 +352,9 @@ export default class MyPlugin extends Plugin {
 				player.ytRef.current
 					?.getInternalPlayer()
 					?.seekTo(newTime, true);
-				player.eventEmitter.emit("showTimestamp");
+				player.eventEmitter.emit("handleAction", {
+					type: "seekBackwards",
+				});
 				// player.ytRef.current?.getInternalPlayer()?.showVideoInfo();
 				// TODO: this isn't working - don't think i can simulate a mousemove to the iframe
 				const existingPlayer = view.containerEl.querySelector(
