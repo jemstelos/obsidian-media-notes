@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Obsidian Media Notes Plugin Instructions</title>
+		<style>
+			body {
+				display: flex;
+				justify-content: center;
+				height: 100vh;
+				margin: 0;
+				padding-top: 50px;
+				font-family: Arial, sans-serif;
+				background: #f1f5f9;
+				color: #1f2937;
+				a,
+				a:visited {
+					color: #1d4ed8;
+				}
+				line-height: 1.6;
+			}
+			h2 {
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<div>
+			<h2>Obsidian Media Notes Plugin</h2>
+			<p>Instructions for setting up the bookmarklet workflow:</p>
+			<ol>
+				<li>
+					Drag this bookmarklet link (<a
+						href="javascript:(function() { var url = window.location.href; if (url.includes('youtube.com')) { var videoId = new URLSearchParams(window.location.search).get('v'); if (videoId) { var title = 'Video. ' + document.title.replace(/[:\/\\]/g, '.'); var encodedTitle = encodeURIComponent(title); var content = encodeURIComponent('---\nmedia_link: ' + url + '\n---\n#Video'); window.open('obsidian://new?name=' + encodedTitle + '&content=' + content); } } })();"
+						>Media Note</a
+					>) to your browser bookmark bar
+				</li>
+				<li>
+					Open up a YouTube
+					<a
+						target="_blank"
+						href="https://www.youtube.com/watch?v=3ipUgBVFNtU"
+						>video</a
+					>
+				</li>
+				<li>
+					Click on the new bookmarklet to create a media note in
+					Obsidian
+				</li>
+			</ol>
+			<hr />
+			<p>
+				I hope this plugin provides you value in your learning.
+				<br />
+				If you'd like to support the work, you can make a donation
+				<a target="_blank" href="https://www.buymeacoffee.com/jemstelos"
+					>here</a
+				>.
+			</p>
+			<div>
+				<a href="https://github.com/jemstelos/obsidian-media-notes"
+					>Github repository</a
+				>
+				<br />
+				<a
+					href="https://github.com/jemstelos/obsidian-media-notes/blob/main/dist/index.html"
+					>Source code for this page</a
+				>
+			</div>
+		</div>
+	</body>
+</html>
