@@ -9,17 +9,15 @@ Capture and replay the insights from YouTube videos, podcasts and lectures, inte
 -   **Resume Playback** - Come back later and pick up from wherever you left off
 -   **Focused Learning Environment** - Take video notes surrounded by your knowledge, not a content feed
 
-TODO: IMAGE GIF
-
 ## Installation
 
-This is a community plugin for Obsidian. Read about and using Obsidian Plugins [here](https://help.obsidian.md/Extending+Obsidian/Community+plugins){:target="\_blank"}.
+This is a community plugin for Obsidian. Read about and using Obsidian Plugins [here](https://help.obsidian.md/Extending+Obsidian/Community+plugins).
 
 Search "Media Notes" in the Community Plugins library to find this plugin and add it.
 
 ## Documentation
 
-A media note is just a markdown note with a `media_link` [property](https://help.obsidian.md/Editing+and+formatting/Properties){:target="\_blank"} that contains a supported URL format (e.g a YouTube link).
+A media note is just a markdown note with a `media_link` [property](https://help.obsidian.md/Editing+and+formatting/Properties) that contains a supported URL format (e.g a YouTube link).
 
 ```
 ---
@@ -48,9 +46,9 @@ More advanced users may want to create a Templater template for media notes that
 
 For a smooth workflow to create media notes from a Youtube page in your browser, you can use a bookmarklet.
 
-A bookmarklet is a browser bookmark that runs a javascript code snippet. In this case, it takes the url and title of the current Youtube page and constructs a URI link for Obsidian's [create note endpoint](https://help.obsidian.md/Extending+Obsidian/Obsidian+URI#Create%20note){:target="\_blank"}. The note created has the media_link inserted, and the video page title in the note title.
+A bookmarklet is a browser bookmark that runs a javascript code snippet. In this case, it takes the url and title of the current Youtube page and constructs a URI link for Obsidian's [create note endpoint](https://help.obsidian.md/Extending+Obsidian/Obsidian+URI#Create%20note). The note created has the media_link inserted, and the video page title in the note title.
 
-Instructions for setup can be found [here]()
+Instructions for setup can be found [here](https://obsidian-media-notes.netlify.app/)
 
 ### Media Controls
 
