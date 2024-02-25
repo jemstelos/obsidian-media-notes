@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState, createContext } from "react";
 import * as React from "react";
-import { MyPluginSettings } from "./main";
+import { MediaNotesPluginSettings } from "./main";
 import { EventEmitter } from "events";
 
 // Define the type for the context
 interface ContextType {
-	settings: MyPluginSettings | null;
+	settings: MediaNotesPluginSettings | null;
 	showTimestamp: boolean;
 	showSeekForward: boolean;
 	showSeekBackwards: boolean;
@@ -18,14 +18,14 @@ export const AppContext = createContext<ContextType | null>(null);
 
 export const AppProvider: React.FC<{
 	children: React.ReactNode;
-	settingsParam: MyPluginSettings | null;
+	settingsParam: MediaNotesPluginSettings | null;
 	eventEmitter: EventEmitter;
 }> = ({ children, settingsParam, eventEmitter }) => {
-	const [settings, setSettings] = useState<MyPluginSettings | null>(
+	const [settings, setSettings] = useState<MediaNotesPluginSettings | null>(
 		settingsParam
 	);
 
-	const updateSettings = (newSettings: MyPluginSettings) => {
+	const updateSettings = (newSettings: MediaNotesPluginSettings) => {
 		setSettings(newSettings);
 	};
 
@@ -37,8 +37,10 @@ export const AppProvider: React.FC<{
 
 	useEffect(() => {
 		// Listen for the 'settingsUpdated' event
-		eventEmitter.on("settingsUpdated", (newSettings: MyPluginSettings) =>
-			updateSettings(newSettings)
+		eventEmitter.on(
+			"settingsUpdated",
+			(newSettings: MediaNotesPluginSettings) =>
+				updateSettings(newSettings)
 		);
 
 		let timestampDebounceTimer: number;

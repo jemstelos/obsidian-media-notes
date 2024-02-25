@@ -3,9 +3,9 @@
 	"name": "Media Notes",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Take timestamped notes on YouTube videos in Obsidian.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Take notes on YouTube videos and podcasts with media controls and timestamps.",
+	"author": "jemstelos",
+	"authorUrl": "https://github.com/jemstelos",
+	"fundingUrl": "https://www.buymeacoffee.com/jemstelos",
 	"isDesktopOnly": false
 }

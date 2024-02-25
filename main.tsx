@@ -13,10 +13,10 @@ import {
 } from "obsidian";
 import * as React from "react";
 import YouTube from "react-youtube";
-import { createClickHandlerPlugin } from "viewPlugin";
+import { createClickHandlerPlugin } from "./viewPlugin";
 import { EventEmitter } from "events";
 
-export interface MyPluginSettings {
+export interface MediaNotesPluginSettings {
 	seekSeconds: number;
 	verticalPlayerHeight: number;
 	horizontalPlayerWidth: number;
@@ -36,14 +36,14 @@ export interface MyPluginSettings {
 	};
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: MediaNotesPluginSettings = {
 	seekSeconds: 10,
-	verticalPlayerHeight: 25,
-	horizontalPlayerWidth: 50,
+	verticalPlayerHeight: 40,
+	horizontalPlayerWidth: 40,
 	defaultSplitMode: "Vertical",
 	displayProgressBar: true,
 	displayTimestamp: true,
-	timestampOffsetSeconds: 5,
+	timestampOffsetSeconds: 10,
 	backgroundColor: "#000000",
 	progressBarColor: "#FF0000",
 	timestampTemplate: "[{ts}]() ",
@@ -81,8 +81,8 @@ const convertTimestampToSeconds = (timestamp: string) => {
 	return seconds;
 };
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class MediaNotesPlugin extends Plugin {
+	settings: MediaNotesPluginSettings;
 
 	players: {
 		[id: string]: {
@@ -123,6 +123,7 @@ export default class MyPlugin extends Plugin {
 	};
 
 	renderPlayerInView = (markdownView: MarkdownView) => {
+		// @ts-ignore TS2339
 		const frontmatter = (parseYaml(markdownView.rawFrontmatter) ??
 			{}) as Record<string, string>;
 		// if there's a media_link
@@ -241,7 +242,7 @@ export default class MyPlugin extends Plugin {
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
-			id: "mn-insert-media-timestamp",
+			id: "insert-media-timestamp",
 			name: "Insert Timestamp",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const player = this.getActiveViewYoutubePlayer(view);
@@ -264,7 +265,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "mn-toggle-play-pause",
+			id: "toggle-play-pause",
 			name: "Play/Pause",
 			editorCallback: async (_editor: Editor, view: MarkdownView) => {
 				const player = this.getActiveViewYoutubePlayer(view);
@@ -286,7 +287,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "mn-toggle-horizontal-view",
+			id: "toggle-horizontal-view",
 			name: "Toggle horizontal/vertical split",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const player = this.getActiveViewYoutubePlayer(view);
@@ -321,7 +322,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "mn-seek-forward",
+			id: "seek-forward",
 			name: "Fast Forward",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const player = this.getActiveViewYoutubePlayer(view);
@@ -340,7 +341,7 @@ export default class MyPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "mn-seek-backwards",
+			id: "seek-backwards",
 			name: "Rewind",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const player = this.getActiveViewYoutubePlayer(view);
@@ -367,19 +368,11 @@ export default class MyPlugin extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SettingsTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, "load", (evt: MouseEvent) => {
-			console.log("click", evt);
-		});
-
 		this.registerEvent(
 			this.app.workspace.on("layout-change", () => {
-				console.log("layout changed");
 				const markdownView =
 					this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (!markdownView) {
-					console.log("active view has been closed");
 					// since we don't have the view anymore, trigger a save on all the players in state
 					Object.keys(this.players).forEach((id) => {
 						this.savePlayerTimestamp(id);
@@ -404,10 +397,6 @@ export default class MyPlugin extends Plugin {
 			})
 		);
 
-		this.app.workspace.onLayoutReady(() => {
-			console.log("layout ready");
-		});
-
 		// TODO: this doesn't work yet, its for Reading mode
 		// this.registerMarkdownPostProcessor(
 		// 	(el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
@@ -428,7 +417,6 @@ export default class MyPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log("unloading!");
 		// if there's an active view, save the timestamp (for development hot reloading)
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView) return;
@@ -462,9 +450,9 @@ export default class MyPlugin extends Plugin {
 }
 
 class SettingsTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: MediaNotesPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: MediaNotesPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}

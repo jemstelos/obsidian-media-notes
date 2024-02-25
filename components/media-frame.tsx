@@ -1,5 +1,5 @@
-import { useAppContext } from "app-context";
-import { formatTimestamp } from "main";
+import { useAppContext } from "../app-context";
+import { formatTimestamp } from "../main";
 import * as React from "react";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import { CSSTransition } from "react-transition-group";
@@ -94,6 +94,7 @@ export const MediaFrame: React.FC<{
 	return (
 		<div className="media-top-container">
 			<div className="media-container">
+				{/* @ts-ignore TS2607 */}
 				<YouTube
 					ref={ytRef}
 					className="youtube-iframe"
@@ -101,8 +102,8 @@ export const MediaFrame: React.FC<{
 					videoId={videoId}
 					opts={opts}
 					onStateChange={onStateChange}
-					onReady={(event) => {
-						const duration = event.target.getDuration();
+					onReady={async (event: YouTubeEvent) => {
+						const duration = await event.target.getDuration();
 						setMaxTime(duration);
 					}}
 				/>
