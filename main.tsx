@@ -43,7 +43,7 @@ const DEFAULT_SETTINGS: MediaNotesPluginSettings = {
 	defaultSplitMode: "Vertical",
 	displayProgressBar: true,
 	displayTimestamp: true,
-	timestampOffsetSeconds: 10,
+	timestampOffsetSeconds: 6,
 	backgroundColor: "#000000",
 	progressBarColor: "#FF0000",
 	timestampTemplate: "[{ts}]() ",
