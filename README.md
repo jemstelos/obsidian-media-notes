@@ -9,6 +9,8 @@ Capture and replay the insights from YouTube videos, podcasts and lectures, inte
 -   **Resume Playback** - Come back later and pick up from wherever you left off
 -   **Focused Learning Environment** - Take video notes surrounded by your knowledge, not a content feed
 
+<img src="images/screen-shot.png">
+
 ## Installation
 
 This is a community plugin for Obsidian. Read about and using Obsidian Plugins [here](https://help.obsidian.md/Extending+Obsidian/Community+plugins).
