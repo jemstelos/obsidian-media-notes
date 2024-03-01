@@ -13,9 +13,7 @@ Capture and replay the insights from YouTube videos, podcasts and lectures, inte
 
 ## Installation
 
-This is a community plugin for Obsidian. Read about and using Obsidian Plugins [here](https://help.obsidian.md/Extending+Obsidian/Community+plugins).
-
-Search "Media Notes" in the Community Plugins library to find this plugin and add it.
+This is a community plugin for Obsidian. Search "Media Notes" in the Community Plugins library to find this plugin and add it. Read more about using Obsidian Plugins [here](https://help.obsidian.md/Extending+Obsidian/Community+plugins).
 
 ## Documentation
 
@@ -55,12 +53,13 @@ Instructions for setup can be found [here](https://obsidian-media-notes.netlify.
 ### Media Controls
 
 One of the main benefits of this plugin is the ability to assign hotkeys to media controls, so that you can control the playback of the content you're taking notes on without leaving your note.
-
--   Play/Pause
--   Seek Forward
--   Seek Backward
-
 Media controls can be bound to any hotkey you like through the Hotkeys settings page.
+
+Suggestion hotkeys for Mac users that mirror YouTube's hotkey layout:
+⌃J - Jump Backward
+⌃K - Play/Pause
+⌃L - Jump Forward
+⌃I - Insert Timestamp
 
 ### Inserting and using Timestamps
 
@@ -81,11 +80,14 @@ A number of settings are provided for you to customize the viewing and note-taki
 ## Roadmap
 
 -   [ ] Support jumping to timestamp links using keyboard shortcuts (e.g alt+enter)
--   [ ] Support for jumping to timestamp link via
+-   [ ] Support for jumping to timestamp link via https://github.com/mrjackphil/obsidian-jump-to-link
 -   [ ] Drag to resize media player frame
+-   [ ] Hotkey to toggle focus onto video and use YouTube hotkeys
+
+If you'd like to provide feedback or suggestions for improvements, please use this [form](https://forms.gle/6DK61u5XMfAKwwwp9)
 
 ## Support
 
-If you receive value from this plugin and would like to support the work, please consider making a donation:
+If you receive value from this plugin and would like to support the work, please consider making a donation!
 
 <a href="https://www.buymeacoffee.com/jemstelos"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=❤️&slug=jemstelos&button_colour=5F7FFF&font_colour=ffffff&font_family=Inter&outline_colour=000000&coffee_colour=FFDD00" /></a>
