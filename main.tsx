@@ -463,14 +463,11 @@ class SettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName("Default Split View")
+			.setName("Default split view")
 			.setDesc(
 				"Vertical or horizontal split view. Defaults to horizontal."
 			)
 			.addDropdown((dropdown) => {
-				console.log(this.plugin.settings.defaultSplitMode);
-
-				// dropdown.setValue(this.plugin.settings.defaultViewHorizontal);
 				dropdown
 					.addOptions({
 						Vertical: "Vertical",
