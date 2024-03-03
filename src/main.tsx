@@ -171,15 +171,7 @@ export default class MediaNotesPlugin extends Plugin {
 			if (!markdownSourceview) return;
 			markdownSourceview.prepend(div);
 
-			let mediaLink;
-			if (isValidURL(frontmatter["media_link"])){
-				mediaLink = regularURL(frontmatter["media_link"]);
-			}
-			else
-			{
-				mediaLink = frontmatter["media_link"];
-			}
-			
+			const mediaLink = regularURL(frontmatter["media_link"]);
 			const ytRef = React.createRef<YouTube>();
 			const eventEmitter = new EventEmitter();
 			this.players[uniqueId] = {
@@ -632,8 +624,11 @@ function isValidURL (mediaLink: string) {
 }
 
 function regularURL (mediaLink: string) {
-	const videoIDregex = /([\w\-]+)/;
-	const videoID = mediaLink.match(videoIDregex)
-	return "https://www.youtube.com/watch?v=" + videoID;
+	if(isValidURL(mediaLink)){
+		const videoIDregex = /([\w\-]+)/;
+		const videoID = mediaLink.match(videoIDregex);
+		return "https://www.youtube.com/watch?v=" + videoID;
+	}
+	return mediaLink;
 }
 
