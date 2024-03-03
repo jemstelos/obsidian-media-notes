@@ -171,7 +171,15 @@ export default class MediaNotesPlugin extends Plugin {
 			if (!markdownSourceview) return;
 			markdownSourceview.prepend(div);
 
-			const mediaLink = frontmatter["media_link"];
+			let mediaLink;
+			if (isValidURL(frontmatter["media_link"])){
+				mediaLink = regularURL(frontmatter["media_link"]);
+			}
+			else
+			{
+				mediaLink = frontmatter["media_link"];
+			}
+			
 			const ytRef = React.createRef<YouTube>();
 			const eventEmitter = new EventEmitter();
 			this.players[uniqueId] = {
@@ -611,3 +619,21 @@ class SettingsTab extends PluginSettingTab {
 			);
 	}
 }
+
+/*	Issue: the shortened link does not work with the plugin.
+	https://youtu.be/JFj8kWm_N-Y?si=OlfDW3x4BogvBLDo and https://www.youtube.com/watch?v=JFj8kWm_N-Y
+	lead to the same video but the plugin does not register the first link as a youtube video.
+	The following code transforms youtu.be link to a youtube.com link.
+*/
+
+function isValidURL (mediaLink: string) {
+	const regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$/;
+	return regex.test(mediaLink);
+}
+
+function regularURL (mediaLink: string) {
+	const videoIDregex = /([\w\-]+)/;
+	const videoID = mediaLink.match(videoIDregex)
+	return "https://www.youtube.com/watch?v=" + videoID;
+}
+
