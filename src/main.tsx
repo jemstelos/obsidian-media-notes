@@ -618,17 +618,10 @@ class SettingsTab extends PluginSettingTab {
 	The following code transforms youtu.be link to a youtube.com link.
 */
 
-function isValidURL (mediaLink: string) {
+function regularURL(mediaLink: string) {
+	// Turns (almost) any Youtube url into the https://www.youtube.com/watch?v={videoId} format
 	const regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$/;
-	return regex.test(mediaLink);
-}
-
-function regularURL (mediaLink: string) {
-	if(isValidURL(mediaLink)){
-		const videoIDregex = /([\w\-]+)/;
-		const videoID = mediaLink.match(videoIDregex);
-		return "https://www.youtube.com/watch?v=" + videoID;
-	}
-	return mediaLink;
-}
+	let videoId = mediaLink.match(regex)[6];
+	return "https://www.youtube.com/watch?v=" + videoId;
+  }
 
