@@ -621,9 +621,9 @@ class SettingsTab extends PluginSettingTab {
 function regularURL(mediaLink: string) {
 	// Turns (almost) any Youtube url into the https://www.youtube.com/watch?v={videoId} format
 	const regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$/;
-	const matches = mediaLink.match(regex);
+	let matches = mediaLink.match(regex);
 	if (matches != null){
-		const videoId = matches[6];
+		const videoId = matches![6];
 		return "https://www.youtube.com/watch?v=" + videoId;
 	}
 	return mediaLink;
