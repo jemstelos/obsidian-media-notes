@@ -612,16 +612,9 @@ class SettingsTab extends PluginSettingTab {
 	}
 }
 
-/*	Issue: the shortened link does not work with the plugin.
-	https://youtu.be/JFj8kWm_N-Y?si=OlfDW3x4BogvBLDo and https://www.youtube.com/watch?v=JFj8kWm_N-Y
-	lead to the same video but the plugin does not register the first link as a youtube video.
-	The following code transforms youtu.be link to a youtube.com link.
-*/
-
 function regularURL(mediaLink: string) {
 	// Turns (almost) any Youtube url into the https://www.youtube.com/watch?v={videoId} format
 	const regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$/;
-	// Why does this not work?
 	if (mediaLink != null)
 	{
 		let videoId = mediaLink.match(regex)?.[6];
