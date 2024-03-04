@@ -171,7 +171,7 @@ export default class MediaNotesPlugin extends Plugin {
 			if (!markdownSourceview) return;
 			markdownSourceview.prepend(div);
 
-			const mediaLink = frontmatter["media_link"];
+			const mediaLink = regularURL(frontmatter["media_link"]);
 			const ytRef = React.createRef<YouTube>();
 			const eventEmitter = new EventEmitter();
 			this.players[uniqueId] = {
@@ -611,3 +611,15 @@ class SettingsTab extends PluginSettingTab {
 			);
 	}
 }
+
+function regularURL(mediaLink: string) {
+	// Turns (almost) any Youtube url into the https://www.youtube.com/watch?v={videoId} format
+	const regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$/;
+	if (mediaLink != null)
+	{
+		let videoId = mediaLink.match(regex)?.[6];
+		return "https://www.youtube.com/watch?v=" + videoId;
+	}
+	return mediaLink;
+  }
+
