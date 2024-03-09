@@ -4,7 +4,7 @@ import * as React from "react";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import { CSSTransition } from "react-transition-group";
 
-const getVideoId = (url: string) => {
+export const getVideoId = (url: string) => {
 	const urlParams = new URLSearchParams(new URL(url).search);
 	return urlParams.get("v");
 };
@@ -13,14 +13,17 @@ export const MediaFrame: React.FC<{
 	mediaLink: string;
 	ytRef: React.RefObject<YouTube>;
 	initSeconds: number;
-}> = ({ mediaLink, ytRef, initSeconds }) => {
+	autoplay?: boolean;
+}> = ({ mediaLink, ytRef, initSeconds, autoplay }) => {
 	const videoId = getVideoId(mediaLink);
 	if (!videoId) return null;
+	console.log(autoplay);
 
 	const opts: YouTubeProps["opts"] = {
 		playerVars: {
 			// this needs to be not undefined to work
 			start: initSeconds,
+			autoplay: autoplay ? 1 : 0,
 		},
 	};
 	// const intervalRef = React.useRef<number | undefined>(undefined);

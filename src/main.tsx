@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { MediaFrame } from "./components/media-frame";
+import { MediaFrame, getVideoId } from "./components/media-frame";
 import { AppProvider } from "./app-context";
 import {
 	App,
@@ -46,7 +46,7 @@ const DEFAULT_SETTINGS: MediaNotesPluginSettings = {
 	timestampOffsetSeconds: 6,
 	backgroundColor: "#000000",
 	progressBarColor: "#FF0000",
-	timestampTemplate: "[{ts}]() ",
+	timestampTemplate: "[{ts}]({link})\n",
 	mediaData: {},
 };
 
@@ -81,6 +81,10 @@ const convertTimestampToSeconds = (timestamp: string) => {
 	return seconds;
 };
 
+const getMediaLinkFromFrontmatter = (frontmatter: Record<string, string>) => {
+	return frontmatter["media_link"] || frontmatter["media"];
+};
+
 export default class MediaNotesPlugin extends Plugin {
 	settings: MediaNotesPluginSettings;
 
@@ -112,7 +116,8 @@ export default class MediaNotesPlugin extends Plugin {
 		player.ytRef.current?.internalPlayer
 			?.getCurrentTime()
 			.then((timestamp: number) => {
-				this.settings.mediaData[player.mediaLink] = {
+				const mediaId = getVideoId(player.mediaLink);
+				this.settings.mediaData[mediaId] = {
 					mediaLink: player.mediaLink,
 					lastUpdated: new Date().toISOString(),
 					lastTimestampSeconds: timestamp,
@@ -127,7 +132,7 @@ export default class MediaNotesPlugin extends Plugin {
 		const frontmatter = (parseYaml(markdownView.rawFrontmatter) ??
 			{}) as Record<string, string>;
 		// if there's a media_link
-		if (frontmatter && frontmatter["media_link"]) {
+		if (frontmatter && getMediaLinkFromFrontmatter(frontmatter)) {
 			const container = markdownView.containerEl;
 			const existingPlayerComponent = container.querySelector(
 				"." + mediaNotesContainerClass
@@ -139,7 +144,11 @@ export default class MediaNotesPlugin extends Plugin {
 					"";
 				const player = this.players[playerId];
 				// If a player state object exists for this media link, don't re-render
-				if (player && player.mediaLink === frontmatter["media_link"]) {
+				if (
+					player &&
+					player.mediaLink ===
+						getMediaLinkFromFrontmatter(frontmatter)
+				) {
 					return;
 				}
 				// remove the existing player
@@ -171,7 +180,7 @@ export default class MediaNotesPlugin extends Plugin {
 			if (!markdownSourceview) return;
 			markdownSourceview.prepend(div);
 
-			const mediaLink = frontmatter["media_link"];
+			const mediaLink = getMediaLinkFromFrontmatter(frontmatter);
 			const ytRef = React.createRef<YouTube>();
 			const eventEmitter = new EventEmitter();
 			this.players[uniqueId] = {
@@ -180,8 +189,23 @@ export default class MediaNotesPlugin extends Plugin {
 				eventEmitter,
 			};
 
-			const mediaData = this.settings.mediaData[mediaLink];
-			const initSeconds = mediaData?.lastTimestampSeconds ?? 0;
+			const mediaId = getVideoId(mediaLink);
+			const mediaData =
+				(mediaId && this.settings.mediaData[mediaId]) ||
+				this.settings.mediaData[mediaLink];
+
+			// extract the url param ts from the media link
+			const mediaLinkUrl = new URL(mediaLink);
+			const mediaLinkParams = new URLSearchParams(mediaLinkUrl.search);
+			const mediaLinkTs = mediaLinkParams.get("t");
+			const initSeconds =
+				mediaData?.lastTimestampSeconds ?? mediaLinkTs ?? 0;
+
+			let autoplay = false;
+			// If the initial seconds came from the mediaLink, autoplay
+			if (mediaLinkTs && Number(initSeconds) === Number(mediaLinkTs)) {
+				autoplay = true;
+			}
 
 			const root = createRoot(div);
 			root.render(
@@ -194,6 +218,7 @@ export default class MediaNotesPlugin extends Plugin {
 							mediaLink={String(mediaLink)}
 							ytRef={ytRef}
 							initSeconds={Math.round(initSeconds)}
+							autoplay={autoplay}
 						/>
 					</AppProvider>
 				</>
@@ -256,10 +281,26 @@ export default class MediaNotesPlugin extends Plugin {
 						: 0;
 				const formattedTimestamp = formatTimestamp(offsetTimestamp);
 				const timestampTemplate = this.settings.timestampTemplate;
-				const timestampSnippet = timestampTemplate.replace(
+				let timestampSnippet = timestampTemplate.replace(
 					"{ts}",
 					formattedTimestamp
 				);
+				const videoUrl =
+					await player.ytRef.current?.internalPlayer?.getVideoUrl();
+
+				if (videoUrl) {
+					// for some reason, the t= param is wrong in the videoUrl from getVidelUrl. fix it
+					const fixedVideoUrl = new URL(videoUrl);
+					fixedVideoUrl.searchParams.set(
+						"t",
+						Math.floor(offsetTimestamp).toString()
+					);
+					timestampSnippet = timestampSnippet.replace(
+						"{link}",
+						`${fixedVideoUrl}`
+					);
+				}
+				timestampSnippet = timestampSnippet.replace(/\\n/g, "\n");
 				editor.replaceSelection(timestampSnippet);
 			},
 		});
@@ -387,7 +428,7 @@ export default class MediaNotesPlugin extends Plugin {
 			this.app.metadataCache.on("changed", (file) => {
 				const frontmatter =
 					this.app.metadataCache.getFileCache(file)?.frontmatter;
-				if (frontmatter && "media_link" in frontmatter) {
+				if (frontmatter && getMediaLinkFromFrontmatter(frontmatter)) {
 					// technically this may not be the same view as the file that changed
 					const markdownView =
 						this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -547,7 +588,7 @@ class SettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Timestamp template")
 			.setDesc(
-				"The template used for inserting a timestamp into the editor. Use '{ts}' as a placeholder for the timestamp."
+				"Markdown template for inserted timestamp. Variables: {ts} is timestamp, {link} is a timestamped url, \\n is new line. Example: \\n- [{ts}]({link}) "
 			)
 			.addText((text) =>
 				text
