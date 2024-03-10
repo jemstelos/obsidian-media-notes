@@ -117,6 +117,7 @@ export default class MediaNotesPlugin extends Plugin {
 			?.getCurrentTime()
 			.then((timestamp: number) => {
 				const mediaId = getVideoId(player.mediaLink);
+				if (!mediaId) return;
 				this.settings.mediaData[mediaId] = {
 					mediaLink: player.mediaLink,
 					lastUpdated: new Date().toISOString(),
