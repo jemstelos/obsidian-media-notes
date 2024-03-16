@@ -26,6 +26,7 @@ export interface MediaNotesPluginSettings {
 	progressBarColor: string;
 	displayProgressBar: boolean;
 	displayTimestamp: boolean;
+	pauseOnTimestampInsert: boolean;
 	defaultSplitMode: "Horizontal" | "Vertical";
 	mediaData: {
 		[id: string]: {
@@ -41,6 +42,7 @@ const DEFAULT_SETTINGS: MediaNotesPluginSettings = {
 	verticalPlayerHeight: 40,
 	horizontalPlayerWidth: 40,
 	defaultSplitMode: "Vertical",
+	pauseOnTimestampInsert: false,
 	displayProgressBar: true,
 	displayTimestamp: true,
 	timestampOffsetSeconds: 6,
@@ -303,6 +305,19 @@ export default class MediaNotesPlugin extends Plugin {
 				}
 				timestampSnippet = timestampSnippet.replace(/\\n/g, "\n");
 				editor.replaceSelection(timestampSnippet);
+				if (this.settings.pauseOnTimestampInsert) {
+					const player = this.getActiveViewYoutubePlayer(view);
+					if (!player || !player.ytRef) return;
+					const playerState =
+						await player.ytRef.current?.internalPlayer?.getPlayerState();
+					if (playerState === YouTube.PlayerState.PLAYING) {
+						player.ytRef.current?.getInternalPlayer()?.pauseVideo();
+						player.eventEmitter.emit("handleAction", {
+							type: "pause",
+						});
+						return;
+					}
+				}
 			},
 		});
 
@@ -648,6 +663,20 @@ class SettingsTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.displayTimestamp)
 					.onChange(async (value) => {
 						this.plugin.settings.displayTimestamp = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Pause media when entering timestamp")
+			.setDesc(
+				"If enabled, the media will automatically pause when a timestamp is entered"
+			)
+			.addToggle((val) =>
+				val
+					.setValue(this.plugin.settings.pauseOnTimestampInsert)
+					.onChange(async (value) => {
+						this.plugin.settings.pauseOnTimestampInsert = value;
 						await this.plugin.saveSettings();
 					})
 			);
