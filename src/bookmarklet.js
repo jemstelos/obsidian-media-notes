@@ -1,5 +1,6 @@
-// test this by pasting into browser console
-(function createMediaNote() {
+/* global window, document */
+
+function createMediaNote() {
 	var url = window.location.href;
 	if (url.includes("youtube.com")) {
 		var videoId = new URLSearchParams(window.location.search).get("v");
@@ -9,7 +10,6 @@
 			if (status === "playing") {
 				videoElement.pause();
 			}
-			// TODO: add support for passing the currentTime into the link, and starting from there
 			var timestamp = videoElement.currentTime;
 
 			var urlObj = new URL(url);
@@ -18,8 +18,9 @@
 				urlObj.searchParams.set("t", Math.floor(timestamp));
 			}
 
-			var title = "Video. " + document.title.replace(/[:\/\\]/g, ".");
-			var encodedTitle = encodeURIComponent(title);
+			var title = makeObsidianFriendly(document.title);
+			title = title.replace(" - YouTube", "");
+			var encodedTitle = encodeURIComponent(title) + ".md";
 			var content = encodeURIComponent(
 				"---\nmedia_link: " + urlObj + "\n---\n#Video"
 			);
@@ -28,4 +29,14 @@
 			);
 		}
 	}
-})();
+}
+
+const makeObsidianFriendly = (title) => {
+	var replacedTitle = "Video. " + title.replace(/[:/\\^|#]/g, ".");
+	return replacedTitle;
+};
+
+// --- exports ---
+// don't change the above line, needed to strip exports from this file
+
+module.exports = { makeObsidianFriendly, createMediaNote };

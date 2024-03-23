@@ -17,8 +17,6 @@ export const MediaFrame: React.FC<{
 }> = ({ mediaLink, ytRef, initSeconds, autoplay }) => {
 	const videoId = getVideoId(mediaLink);
 	if (!videoId) return null;
-	console.log(autoplay);
-
 	const opts: YouTubeProps["opts"] = {
 		playerVars: {
 			// this needs to be not undefined to work
