@@ -668,9 +668,9 @@ class SettingsTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Pause media when entering timestamp")
+			.setName("Pause media when inserting timestamp")
 			.setDesc(
-				"If enabled, the media will automatically pause when a timestamp is entered"
+				"If enabled, the media will pause when a timestamp is inserted"
 			)
 			.addToggle((val) =>
 				val
