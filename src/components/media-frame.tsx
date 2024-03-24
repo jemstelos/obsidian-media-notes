@@ -7,7 +7,10 @@ import { CSSTransition } from "react-transition-group";
 const getVideoId = (url: string) => {
 	//returns the Youtube-VideoId of an url, no matter the format.
 	const regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$/;
-	return url.match(regex)?.[6];
+	if (url != null){
+		return url.match(regex)?.[6];
+	}
+	return "";
 };
 
 export const MediaFrame: React.FC<{
