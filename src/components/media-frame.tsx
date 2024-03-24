@@ -5,8 +5,9 @@ import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import { CSSTransition } from "react-transition-group";
 
 const getVideoId = (url: string) => {
-	const urlParams = new URLSearchParams(new URL(url).search);
-	return urlParams.get("v");
+	//returns the Youtube-VideoId of an url, no matter the format.
+	const regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$/;
+	return url.match(regex)?.[6];
 };
 
 export const MediaFrame: React.FC<{
