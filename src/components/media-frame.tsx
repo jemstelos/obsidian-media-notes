@@ -4,7 +4,7 @@ import * as React from "react";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import { CSSTransition } from "react-transition-group";
 
-const getVideoId = (url: string) => {
+export const getVideoId = (url: string) => {
 	//returns the Youtube-VideoId of an url, no matter the format.
 	const regex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$/;
 	if (url != null){
