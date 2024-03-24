@@ -422,6 +422,56 @@ export default class MediaNotesPlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: "speed-up",
+			name: "Speed up",
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
+				const player = this.getActiveViewYoutubePlayer(view);
+				if (!player || !player.ytRef) return;
+				const internalPlayer =
+					player.ytRef.current?.getInternalPlayer();
+				if (!internalPlayer) return;
+				const playbackRates =
+					await internalPlayer.getAvailablePlaybackRates();
+				const currentRate = await internalPlayer.getPlaybackRate();
+				const currentRateIndex = playbackRates.indexOf(currentRate);
+				const nextRateIndex =
+					currentRateIndex + 1 < playbackRates.length
+						? currentRateIndex + 1
+						: currentRateIndex;
+				const nextRate = playbackRates[nextRateIndex];
+				internalPlayer.setPlaybackRate(nextRate);
+				player.eventEmitter.emit("handleAction", {
+					type: "setSpeed",
+					speed: nextRate,
+				});
+			},
+		});
+
+		this.addCommand({
+			id: "slow-down",
+			name: "Slow down",
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
+				const player = this.getActiveViewYoutubePlayer(view);
+				if (!player || !player.ytRef) return;
+				const internalPlayer =
+					player.ytRef.current?.getInternalPlayer();
+				if (!internalPlayer) return;
+				const playbackRates =
+					await internalPlayer.getAvailablePlaybackRates();
+				const currentRate = await internalPlayer.getPlaybackRate();
+				const currentRateIndex = playbackRates.indexOf(currentRate);
+				const nextRateIndex =
+					currentRateIndex - 1 >= 0 ? currentRateIndex - 1 : 0;
+				const nextRate = playbackRates[nextRateIndex];
+				internalPlayer.setPlaybackRate(nextRate);
+				player.eventEmitter.emit("handleAction", {
+					type: "setSpeed",
+					speed: nextRate,
+				});
+			},
+		});
+
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SettingsTab(this.app, this));
 
@@ -478,6 +528,7 @@ export default class MediaNotesPlugin extends Plugin {
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView) return;
 		const container = activeView.containerEl;
+
 		// cleanup existing players, and save timestamp
 		const div = container.querySelector("." + mediaNotesContainerClass);
 		if (div) {

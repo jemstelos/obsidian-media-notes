@@ -11,6 +11,8 @@ interface ContextType {
 	showSeekBackwards: boolean;
 	showPlay: boolean;
 	showPause: boolean;
+	showSpeed: boolean;
+	currentSpeed?: number;
 }
 
 // Create the context with initial value as null
@@ -34,6 +36,8 @@ export const AppProvider: React.FC<{
 	const [showSeekBackwards, setShowSeekBackwards] = useState<boolean>(false);
 	const [showPlay, setShowPlay] = useState<boolean>(false);
 	const [showPause, setShowPause] = useState<boolean>(false);
+	const [showSpeed, setShowSpeed] = useState<boolean>(false);
+	const [currentSpeed, setCurrentSpeed] = useState<number | undefined>(1);
 
 	useEffect(() => {
 		// Listen for the 'settingsUpdated' event
@@ -45,10 +49,19 @@ export const AppProvider: React.FC<{
 
 		let timestampDebounceTimer: number;
 		let playPauseDebounceTimer: number;
-		const handleShowTimestamp = ({ type }: { type: string }) => {
+		let speedDebounceTimer: number;
+
+		const handleShowTimestamp = ({
+			type,
+			speed,
+		}: {
+			type: string;
+			speed?: number;
+		}) => {
 			// Clear the previous timer if there is one
 			clearTimeout(timestampDebounceTimer);
 			clearTimeout(playPauseDebounceTimer);
+			clearTimeout(speedDebounceTimer);
 
 			setShowSeekForward(false);
 			// set them all to false again so that we can then set things to true again and get the animation
@@ -56,6 +69,7 @@ export const AppProvider: React.FC<{
 			setShowSeekBackwards(false);
 			setShowPause(false);
 			setShowPause(false);
+			setShowSpeed(false);
 
 			// slight setTimeout to get the state set on the next tick
 			setTimeout(() => {
@@ -72,9 +86,12 @@ export const AppProvider: React.FC<{
 				if (type === "pause") {
 					setShowPause(true);
 				}
+				if (type === "setSpeed") {
+					setCurrentSpeed(speed);
+					setShowSpeed(true);
+				}
 				// Set a new timer to hide the timestamp
 				timestampDebounceTimer = window.setTimeout(() => {
-					console.log("debounced setting to false");
 					setShowTimestamp(false);
 					setShowSeekForward(false);
 					setShowSeekBackwards(false);
@@ -82,6 +99,10 @@ export const AppProvider: React.FC<{
 				playPauseDebounceTimer = window.setTimeout(() => {
 					setShowPlay(false);
 					setShowPause(false);
+				}, 500);
+				speedDebounceTimer = window.setTimeout(() => {
+					console.log("setting speed to false");
+					setShowSpeed(false);
 				}, 500);
 			}, 20);
 		};
@@ -104,6 +125,8 @@ export const AppProvider: React.FC<{
 				showSeekForward,
 				showPause,
 				showPlay,
+				showSpeed,
+				currentSpeed,
 			}}
 		>
 			{children}

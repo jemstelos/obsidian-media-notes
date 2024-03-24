@@ -91,6 +91,7 @@ export const MediaFrame: React.FC<{
 	const seekForwardRef = React.useRef(null);
 	const playRef = React.useRef(null);
 	const pauseRef = React.useRef(null);
+	const speedRef = React.useRef(null);
 
 	return (
 		<div className="media-top-container">
@@ -204,6 +205,19 @@ export const MediaFrame: React.FC<{
 								</div>
 							</div>
 						</div>
+					</div>
+				</CSSTransition>
+				<CSSTransition
+					nodeRef={speedRef}
+					in={context?.showSpeed}
+					timeout={1000}
+					// This class is used for the transition classes (e.g speed-icon-enter)
+					classNames="speed-icon"
+					mountOnEnter={true}
+					unmountOnExit={true}
+				>
+					<div ref={speedRef} className="speed-icon">
+						{context?.currentSpeed}x
 					</div>
 				</CSSTransition>
 				<div

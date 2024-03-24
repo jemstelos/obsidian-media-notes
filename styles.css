@@ -153,6 +153,38 @@ If your plugin does not need CSS, delete this file.
 	justify-content: center;
 }
 
+.speed-icon {
+	position: absolute;
+	top: 20%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-size: contain;
+	background-color: rgba(0, 0, 0, 0.8);
+	display: flex;
+	border-radius: 25px;
+	align-items: center;
+	justify-content: center;
+	padding: 5px 15px;
+	transition: opacity 250ms;
+}
+
+.speed-icon-enter,
+.speed-icon-exit-done {
+	opacity: 0;
+}
+.speed-icon-enter-active {
+	opacity: 1;
+}
+.speed-icon-enter-done {
+	opacity: 0;
+}
+.speed-icon-exit {
+	opacity: 0;
+}
+.speed-icon-exit-active {
+	opacity: 0;
+}
+
 @keyframes fadeInOut {
 	0%,
 	100% {

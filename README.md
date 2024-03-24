@@ -76,6 +76,8 @@ Search "Media Notes" in the Obsidian Community Plugins library to find this plug
 
 ## Roadmap
 
+-   [x] Speed controls
+-   [x] Pause when inserting timestamp
 -   [ ] Support jumping to timestamp links using keyboard shortcuts (e.g alt+enter)
 -   [ ] Support for jumping to timestamp link via https://github.com/mrjackphil/obsidian-jump-to-link
 -   [ ] Drag to resize media player frame
