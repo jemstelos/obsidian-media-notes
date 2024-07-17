@@ -178,8 +178,8 @@ export const MediaFrame: React.FC<{
 					<div ref={seekBackRef} className="seek-backwards">
 						<div className="round">
 							<div id="cta">
-								<span className="arrow bounceAlphaBack primera back "></span>
-								<span className="arrow bounceAlphaBack segunda back "></span>
+								<span className="mn-arrow bounceAlphaBack primera back "></span>
+								<span className="mn-arrow bounceAlphaBack segunda back "></span>
 								<div className="text">
 									{context?.settings?.seekSeconds}s
 								</div>
@@ -198,8 +198,8 @@ export const MediaFrame: React.FC<{
 					<div ref={seekForwardRef} className="seek-forwards">
 						<div className="round">
 							<div id="cta">
-								<span className="arrow bounceAlpha segunda next "></span>
-								<span className="arrow bounceAlpha primera next "></span>
+								<span className="mn-arrow bounceAlpha segunda next "></span>
+								<span className="mn-arrow bounceAlpha primera next "></span>
 								<div className="text">
 									{context?.settings?.seekSeconds}s
 								</div>

@@ -254,7 +254,7 @@ If your plugin does not need CSS, delete this file.
 	position: absolute;
 }
 
-#cta .arrow {
+#cta .mn-arrow {
 	left: 33%;
 }
 
@@ -264,7 +264,7 @@ If your plugin does not need CSS, delete this file.
 	width: 100%;
 	font-size: 11px;
 }
-.arrow {
+.mn-arrow {
 	position: absolute;
 	bottom: 0;
 	margin-left: 0px;
@@ -277,7 +277,7 @@ If your plugin does not need CSS, delete this file.
 .segunda {
 	margin-left: 12px;
 }
-#cta .bounceAlphaBack.arrow {
+#cta .bounceAlphaBack.mn-arrow {
 	left: 22%;
 }
 .bounceAlphaBack.segunda {
@@ -320,7 +320,7 @@ If your plugin does not need CSS, delete this file.
 	animation-timing-function: linear;
 }
 
-.arrow.primera.bounceAlpha {
+.mn-arrow.primera.bounceAlpha {
 	animation-name: bounceAlpha;
 	animation-duration: 1.4s;
 	animation-delay: 0.2s;
@@ -354,7 +354,7 @@ If your plugin does not need CSS, delete this file.
 	animation-timing-function: linear;
 }
 
-.arrow.primera.bounceAlphaBack {
+.mn-arrow.primera.bounceAlphaBack {
 	animation-name: bounceAlphaBack;
 	animation-duration: 1.4s;
 	animation-delay: 0.2s;
