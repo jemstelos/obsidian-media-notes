@@ -1,7 +1,7 @@
 {
 	"id": "media-notes",
 	"name": "Media Notes",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"minAppVersion": "0.15.0",
 	"description": "Take notes on YouTube videos and podcasts with media controls and timestamps.",
 	"author": "jemstelos",

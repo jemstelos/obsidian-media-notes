@@ -1,6 +1,6 @@
 # Obsidian Media Notes
 
-<a href="https://obsidian.md/plugins?id=media-notes"><img src="https://img.shields.io/badge/media_notes-v1.1-6c31e3?logo=obsidian&style=for-the-badge"></a><br>
+<a href="https://obsidian.md/plugins?id=media-notes"><img src="https://img.shields.io/badge/media_notes-v1.3-6c31e3?logo=obsidian&style=for-the-badge"></a><br>
 
 A best-in-class video note-taking experience in Obsidian.
 
