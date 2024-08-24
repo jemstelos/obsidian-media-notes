@@ -27,7 +27,7 @@ If your plugin does not need CSS, delete this file.
 	height: 100%;
 	width: 100%;
 	position: relative;
-	max-width: 720px;
+	max-width: var(--file-line-width);
 	display: block;
 	margin: 0 auto;
 }
