@@ -48,7 +48,7 @@ const DEFAULT_SETTINGS: MediaNotesPluginSettings = {
 	timestampOffsetSeconds: 6,
 	backgroundColor: "#000000",
 	progressBarColor: "#FF0000",
-	timestampTemplate: "[{ts}]({link})\n",
+	timestampTemplate: "[{ts}]({link})\\n",
 	mediaData: {},
 };
 
