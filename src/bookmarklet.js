@@ -32,7 +32,7 @@ function createMediaNote() {
 }
 
 const makeObsidianFriendly = (title) => {
-	var replacedTitle = "Video. " + title.replace(/[:/\\^|#]/g, ".");
+	var replacedTitle = "Video. " + title.replace(/[:/\\^|#\?\*"<>]/g, ".");
 	return replacedTitle;
 };
 
