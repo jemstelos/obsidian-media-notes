@@ -27,6 +27,7 @@ export interface MediaNotesPluginSettings {
 	displayProgressBar: boolean;
 	displayTimestamp: boolean;
 	pauseOnTimestampInsert: boolean;
+	disableWidthLimit: boolean;
 	defaultSplitMode: "Horizontal" | "Vertical";
 	mediaData: {
 		[id: string]: {
@@ -43,6 +44,7 @@ const DEFAULT_SETTINGS: MediaNotesPluginSettings = {
 	horizontalPlayerWidth: 40,
 	defaultSplitMode: "Vertical",
 	pauseOnTimestampInsert: false,
+	disableWidthLimit: false,
 	displayProgressBar: true,
 	displayTimestamp: true,
 	timestampOffsetSeconds: 6,
@@ -132,7 +134,8 @@ export default class MediaNotesPlugin extends Plugin {
 
 	renderPlayerInView = (markdownView: MarkdownView) => {
 		// @ts-ignore TS2339
-		const frontmatter = (parseYaml(markdownView.rawFrontmatter) ??
+		const rawFrontmatter = markdownView.rawFrontmatter ?? "";
+		const frontmatter = (parseYaml(rawFrontmatter) ??
 			{}) as Record<string, string>;
 		// if there's a media_link
 		if (frontmatter && getMediaLinkFromFrontmatter(frontmatter)) {
@@ -210,6 +213,8 @@ export default class MediaNotesPlugin extends Plugin {
 				autoplay = true;
 			}
 
+			const disableWidthLimit = this.settings.disableWidthLimit;
+
 			const root = createRoot(div);
 			root.render(
 				<>
@@ -222,6 +227,7 @@ export default class MediaNotesPlugin extends Plugin {
 							ytRef={ytRef}
 							initSeconds={Math.round(initSeconds)}
 							autoplay={autoplay}
+							disableWidthLimit={disableWidthLimit}
 						/>
 					</AppProvider>
 				</>
@@ -616,6 +622,21 @@ class SettingsTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.verticalPlayerHeight)
 					.onChange(async (value) => {
 						this.plugin.settings.verticalPlayerHeight = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Disable video width limit")
+			.setClass("subSettings")
+			.setDesc(
+				"If enabled, in horizontal split mode the video player will expand to the width of the pane."
+			)
+			.addToggle((val) =>
+				val
+					.setValue(this.plugin.settings.disableWidthLimit)
+					.onChange(async (value) => {
+						this.plugin.settings.disableWidthLimit = value;
 						await this.plugin.saveSettings();
 					})
 			);

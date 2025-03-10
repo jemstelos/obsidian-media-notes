@@ -14,7 +14,8 @@ export const MediaFrame: React.FC<{
 	ytRef: React.RefObject<YouTube>;
 	initSeconds: number;
 	autoplay?: boolean;
-}> = ({ mediaLink, ytRef, initSeconds, autoplay }) => {
+	disableWidthLimit?: boolean;
+}> = ({ mediaLink, ytRef, initSeconds, autoplay, disableWidthLimit }) => {
 	const videoId = getVideoId(mediaLink);
 	if (!videoId) return null;
 	const opts: YouTubeProps["opts"] = {
@@ -95,7 +96,7 @@ export const MediaFrame: React.FC<{
 
 	return (
 		<div className="media-top-container">
-			<div className="media-container">
+			<div className={`media-container${disableWidthLimit ? " no-width-limit": ""}`}>
 				{/* @ts-ignore TS2607 */}
 				<YouTube
 					ref={ytRef}

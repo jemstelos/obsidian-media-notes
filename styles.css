@@ -16,6 +16,7 @@ If your plugin does not need CSS, delete this file.
 .youtube-iframe {
 	height: 100%;
 	width: 100%;
+	overflow: clip;
 }
 
 .media-top-container {
@@ -36,6 +37,10 @@ If your plugin does not need CSS, delete this file.
 	.media-container {
 		max-width: 950px;
 	}
+}
+
+.media-container.no-width-limit {
+	max-width: none;
 }
 
 .media-container-parent-vertical .markdown-source-view {
@@ -360,4 +365,8 @@ If your plugin does not need CSS, delete this file.
 	animation-delay: 0.2s;
 	animation-iteration-count: infinite;
 	animation-timing-function: linear;
+}
+
+.subSettings {
+	margin-left: 40px;
 }
