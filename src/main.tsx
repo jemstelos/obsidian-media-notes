@@ -257,7 +257,10 @@ export default class MediaNotesPlugin extends Plugin {
 
 	async onload() {
 		this.registerEditorExtension([
-			createClickHandlerPlugin(this.handleTimestampClick),
+			createClickHandlerPlugin(
+				this.handleTimestampClick,
+				() => this.settings.timestampTemplate
+			),
 		]);
 		await this.loadSettings();
 
