@@ -42,6 +42,8 @@ Clicking links that have the timestamp format (`HH:MM:SS`) will jump the playbac
 
 ## Settings
 
+Requires Obsidian 1.13.0 or newer. All preferences appear in Obsidian's built-in settings search by name and description. Existing settings and saved playback positions are preserved.
+
 Customize the viewing and note-taking experience with settings:
 
 -   Vertical/Horizontal Player Mode - this sets the default viewing behavior, you can still toggle the mode for any given note
@@ -70,6 +72,8 @@ Timestamps are inserted into the note as markdown links with a timestamp format:
 Clicking links that have the timestamp format (`HH:MM:SS`) will jump the playback time for the note's media player to that timestamp.
 
 ## Installation
+
+Requires Obsidian 1.13.0 or newer.
 
 <a href="https://obsidian.md/plugins?id=media-notes"><img src="https://img.shields.io/badge/Install_now-6c31e3?logo=obsidian"></a><br>
 Search "Media Notes" in the Obsidian Community Plugins library to find this plugin and add it.

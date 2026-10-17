@@ -2,12 +2,9 @@ import { createRoot } from "react-dom/client";
 import { MediaFrame, getVideoId } from "./components/media-frame";
 import { AppProvider } from "./app-context";
 import {
-	App,
 	Editor,
 	MarkdownView,
 	Plugin,
-	PluginSettingTab,
-	Setting,
 	View,
 	parseYaml,
 } from "obsidian";
@@ -15,6 +12,7 @@ import * as React from "react";
 import YouTube from "react-youtube";
 import { createClickHandlerPlugin } from "./viewPlugin";
 import { EventEmitter } from "events";
+import { SettingsTab } from "./settings";
 
 export interface MediaNotesPluginSettings {
 	seekSeconds: number;
@@ -554,182 +552,5 @@ export default class MediaNotesPlugin extends Plugin {
 		Object.values(this.players).forEach((player) => {
 			player.eventEmitter.emit("settingsUpdated", this.settings);
 		});
-	}
-}
-
-class SettingsTab extends PluginSettingTab {
-	plugin: MediaNotesPlugin;
-
-	constructor(app: App, plugin: MediaNotesPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const { containerEl } = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName("Default split view")
-			.setDesc(
-				"Vertical or horizontal split view. Defaults to horizontal."
-			)
-			.addDropdown((dropdown) => {
-				dropdown
-					.addOptions({
-						Vertical: "Vertical",
-						Horizontal: "Horizontal",
-					})
-					.setValue(this.plugin.settings.defaultSplitMode)
-					.onChange(async (value) => {
-						this.plugin.settings.defaultSplitMode = value as
-							| "Vertical"
-							| "Horizontal";
-						await this.plugin.saveSettings();
-					});
-			});
-
-		new Setting(containerEl)
-			.setName("Rewind & fast forward seconds")
-			.setDesc("Number of seconds to rewind/fast forward")
-			.addSlider((slider) =>
-				slider
-					.setLimits(1, 60, 1)
-					.setDynamicTooltip()
-					.setValue(this.plugin.settings.seekSeconds)
-					.onChange(async (value) => {
-						this.plugin.settings.seekSeconds = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Player height (%) in horizontal-split mode")
-			.setDesc(
-				"The height of the player as a percentage of the viewport in horizontal-split mode."
-			)
-			.addSlider((slider) =>
-				slider
-					.setLimits(5, 95, 5)
-					.setDynamicTooltip()
-					.setValue(this.plugin.settings.verticalPlayerHeight)
-					.onChange(async (value) => {
-						this.plugin.settings.verticalPlayerHeight = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Player width (%) in vertical-split mode")
-			.setDesc(
-				"The width of the player as a percentage of the viewport in vertical-split mode."
-			)
-			.addSlider((slider) =>
-				slider
-					.setLimits(5, 95, 5)
-					.setDynamicTooltip()
-					.setValue(this.plugin.settings.horizontalPlayerWidth)
-					.onChange(async (value) => {
-						this.plugin.settings.horizontalPlayerWidth = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Timestamp offset seconds")
-			.setDesc(
-				"Number of seconds in the past to offset by when inserting the timestamp."
-			)
-			.addSlider((slider) =>
-				slider
-					.setLimits(0, 60, 1)
-					.setDynamicTooltip()
-					.setValue(this.plugin.settings.timestampOffsetSeconds)
-					.onChange(async (value) => {
-						this.plugin.settings.timestampOffsetSeconds = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Timestamp template")
-			.setDesc(
-				"Markdown template for inserted timestamp. Variables: {ts} is timestamp, {link} is a timestamped url, \\n is new line. Example: \\n- [{ts}]({link}) "
-			)
-			.addText((text) =>
-				text
-					.setValue(this.plugin.settings.timestampTemplate)
-					.onChange(async (value) => {
-						this.plugin.settings.timestampTemplate = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Video player background")
-			.setDesc(
-				"Background color for the video player. e.g #dddddd or rgba(0, 0, 0, 0.8)"
-			)
-			.addColorPicker((color) =>
-				color
-					.setValue(this.plugin.settings.backgroundColor)
-					.onChange(async (value) => {
-						this.plugin.settings.backgroundColor = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Show progress bar")
-			.setDesc("Display a progress bar for the elapsed time")
-			.addToggle((val) =>
-				val
-					.setValue(this.plugin.settings.displayProgressBar)
-					.onChange(async (value) => {
-						this.plugin.settings.displayProgressBar = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Progress bar color")
-			.setDesc("Color of the progress bar below the video")
-			.addColorPicker((color) =>
-				color
-					.setValue(this.plugin.settings.progressBarColor)
-					.onChange(async (value) => {
-						this.plugin.settings.progressBarColor = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Always display current timestamp")
-			.setDesc(
-				"Always display the current timestamp. Default behavior is to only show it when seeking."
-			)
-			.addToggle((val) =>
-				val
-					.setValue(this.plugin.settings.displayTimestamp)
-					.onChange(async (value) => {
-						this.plugin.settings.displayTimestamp = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Pause media when inserting timestamp")
-			.setDesc(
-				"If enabled, the media will pause when a timestamp is inserted"
-			)
-			.addToggle((val) =>
-				val
-					.setValue(this.plugin.settings.pauseOnTimestampInsert)
-					.onChange(async (value) => {
-						this.plugin.settings.pauseOnTimestampInsert = value;
-						await this.plugin.saveSettings();
-					})
-			);
 	}
 }
