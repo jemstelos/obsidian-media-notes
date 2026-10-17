@@ -23,6 +23,22 @@ This lets you click a button in your browser bar and automatically create a note
 
 You can turn any Obsidian note into a media note by using the `Add file property` command, then typing in `media_link` and pasting the URL.
 
+### Obsidian Web Clipper
+
+If you use [Obsidian Web Clipper](https://obsidian.md/clipper), you can create media notes with the included [Media Notes template](YT-notes-webclipper.json).
+
+1. Download [YT-notes-webclipper.json](YT-notes-webclipper.json) using GitHub's **Download raw file** button.
+2. Open Web Clipper settings, select a template, and click **Import**, or drag the downloaded JSON file into the template area. See the [official import instructions](https://help.obsidian.md/web-clipper/templates).
+3. Select the imported **Media Notes** template. Choose your destination vault and change the default `YouTube` folder if needed.
+4. Open a YouTube video page, open Web Clipper, and save the note. The template is selected automatically for matching YouTube URLs; select **Media Notes** manually if another template takes precedence.
+5. Open the note in Obsidian's editing view with Media Notes enabled.
+
+The template uses the page title as the note name and saves the URL in `media_link` and `source`. It also adds a title property, an empty optional `published` date, space for notes, and clipped page content under a Description heading.
+
+Unlike the bookmarklet, Web Clipper does not pause the browser video or capture its current playback position. It saves the page URL as-is, including a timestamp parameter only if one is already in that URL.
+
+For playback with the current plugin, use a standard YouTube watch URL containing `watch?v=...`. The template also matches short links and other YouTube pages, but it does not expand short links or add support for new player URL formats.
+
 ## Media Controls
 
 Setup hotkeys to allow you to control the playback of the media you're taking notes on without leaving your note.
