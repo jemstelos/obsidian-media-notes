@@ -38,6 +38,9 @@
 		"react-youtube": "^10.1.0"
 	},
 	"jest": {
-		"testEnvironment": "jsdom"
+		"testEnvironment": "jsdom",
+		"transform": {
+			"^.+\\.tsx?$": "<rootDir>/src/__tests__/typescript-transformer.cjs"
+		}
 	}
 }

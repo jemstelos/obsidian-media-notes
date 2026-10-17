@@ -3,10 +3,16 @@ import { formatTimestamp } from "../main";
 import * as React from "react";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import { CSSTransition } from "react-transition-group";
+const youtubeIframeAllow =
+	"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
 
 export const getVideoId = (url: string) => {
-	const urlParams = new URLSearchParams(new URL(url).search);
-	return urlParams.get("v");
+	try {
+		const urlParams = new URLSearchParams(new URL(url).search);
+		return urlParams.get("v");
+	} catch {
+		return null;
+	}
 };
 
 export const MediaFrame: React.FC<{
@@ -15,6 +21,7 @@ export const MediaFrame: React.FC<{
 	initSeconds: number;
 	autoplay?: boolean;
 }> = ({ mediaLink, ytRef, initSeconds, autoplay }) => {
+	const containerRef = React.useRef<HTMLDivElement>(null);
 	const videoId = getVideoId(mediaLink);
 	if (!videoId) return null;
 	const opts: YouTubeProps["opts"] = {
@@ -22,6 +29,7 @@ export const MediaFrame: React.FC<{
 			// this needs to be not undefined to work
 			start: initSeconds,
 			autoplay: autoplay ? 1 : 0,
+			origin: window.location.origin,
 		},
 	};
 	// const intervalRef = React.useRef<number | undefined>(undefined);
@@ -54,6 +62,10 @@ export const MediaFrame: React.FC<{
 		const handleAsyncCode = async () => {
 			const state = event.data;
 			// if it was paused and now playing, set the current timestamp and making a polling setTimeout to check the player's current time and set the current timestamp every 1s
+			if (intervalRef.current !== null) {
+				window.clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
 			if (state === 1) {
 				updateTimestamp();
 				const interval = window.setInterval(() => {
@@ -63,8 +75,7 @@ export const MediaFrame: React.FC<{
 				setHideProgressBar(false);
 			}
 			// if it was playing and is now paused, remove the polling interval and set
-			if ((state === 2 || state === 0) && intervalRef.current) {
-				window.clearInterval(intervalRef.current);
+			if (state === 2 || state === 0) {
 				setHideProgressBar(true);
 			}
 		};
@@ -72,8 +83,23 @@ export const MediaFrame: React.FC<{
 	};
 
 	React.useEffect(() => {
+		const setIframeAttributes = () => {
+			const iframe = containerRef.current?.querySelector<HTMLIFrameElement>(
+				"iframe.youtube-iframe"
+			);
+			if (!iframe) return;
+			iframe.referrerPolicy = "strict-origin-when-cross-origin";
+			iframe.allow = youtubeIframeAllow;
+			iframe.allowFullscreen = true;
+		};
+		setIframeAttributes();
+		const observer = new MutationObserver(setIframeAttributes);
+		if (containerRef.current) {
+			observer.observe(containerRef.current, { childList: true, subtree: true });
+		}
 		return () => {
-			if (intervalRef.current) {
+			observer.disconnect();
+			if (intervalRef.current !== null) {
 				window.clearInterval(intervalRef.current);
 			}
 		};
@@ -94,7 +120,7 @@ export const MediaFrame: React.FC<{
 	const speedRef = React.useRef(null);
 
 	return (
-		<div className="media-top-container">
+		<div ref={containerRef} className="media-top-container">
 			<div className="media-container">
 				{/* @ts-ignore TS2607 */}
 				<YouTube

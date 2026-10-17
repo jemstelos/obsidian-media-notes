@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState, createContext } from "react";
 import * as React from "react";
 import { MediaNotesPluginSettings } from "./main";
-import { EventEmitter } from "events";
+import { EventEmitter } from "./event-emitter";
 
 // Define the type for the context
 interface ContextType {
@@ -27,10 +27,6 @@ export const AppProvider: React.FC<{
 		settingsParam
 	);
 
-	const updateSettings = (newSettings: MediaNotesPluginSettings) => {
-		setSettings(newSettings);
-	};
-
 	const [showTimestamp, setShowTimestamp] = useState<boolean>(false);
 	const [showSeekForward, setShowSeekForward] = useState<boolean>(false);
 	const [showSeekBackwards, setShowSeekBackwards] = useState<boolean>(false);
@@ -41,15 +37,15 @@ export const AppProvider: React.FC<{
 
 	useEffect(() => {
 		// Listen for the 'settingsUpdated' event
-		eventEmitter.on(
-			"settingsUpdated",
-			(newSettings: MediaNotesPluginSettings) =>
-				updateSettings(newSettings)
-		);
+		const updateSettings = (newSettings: MediaNotesPluginSettings) => {
+			setSettings({ ...newSettings });
+		};
+		eventEmitter.on("settingsUpdated", updateSettings);
 
 		let timestampDebounceTimer: number;
 		let playPauseDebounceTimer: number;
 		let speedDebounceTimer: number;
+		let actionTimer: number;
 
 		const handleShowTimestamp = ({
 			type,
@@ -62,17 +58,18 @@ export const AppProvider: React.FC<{
 			clearTimeout(timestampDebounceTimer);
 			clearTimeout(playPauseDebounceTimer);
 			clearTimeout(speedDebounceTimer);
+			clearTimeout(actionTimer);
 
 			setShowSeekForward(false);
 			// set them all to false again so that we can then set things to true again and get the animation
 			setShowTimestamp(false);
 			setShowSeekBackwards(false);
-			setShowPause(false);
+			setShowPlay(false);
 			setShowPause(false);
 			setShowSpeed(false);
 
 			// slight setTimeout to get the state set on the next tick
-			setTimeout(() => {
+			actionTimer = window.setTimeout(() => {
 				setShowTimestamp(true);
 				if (type === "seekForward") {
 					setShowSeekForward(true);
@@ -112,9 +109,13 @@ export const AppProvider: React.FC<{
 		// Clean up the listener when the component unmounts
 		return () => {
 			eventEmitter.off("settingsUpdated", updateSettings);
+			eventEmitter.off("handleAction", handleShowTimestamp);
+			clearTimeout(actionTimer);
 			clearTimeout(timestampDebounceTimer);
+			clearTimeout(playPauseDebounceTimer);
+			clearTimeout(speedDebounceTimer);
 		};
-	}, []);
+	}, [eventEmitter]);
 
 	return (
 		<AppContext.Provider
