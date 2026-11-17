@@ -41,15 +41,12 @@ export const AppProvider: React.FC<{
 
 	useEffect(() => {
 		// Listen for the 'settingsUpdated' event
-		eventEmitter.on(
-			"settingsUpdated",
-			(newSettings: MediaNotesPluginSettings) =>
-				updateSettings(newSettings)
-		);
+		eventEmitter.on("settingsUpdated", updateSettings);
 
 		let timestampDebounceTimer: number;
 		let playPauseDebounceTimer: number;
 		let speedDebounceTimer: number;
+		let showDebounceTimer: number;
 
 		const handleShowTimestamp = ({
 			type,
@@ -62,17 +59,18 @@ export const AppProvider: React.FC<{
 			clearTimeout(timestampDebounceTimer);
 			clearTimeout(playPauseDebounceTimer);
 			clearTimeout(speedDebounceTimer);
+			clearTimeout(showDebounceTimer);
 
 			setShowSeekForward(false);
 			// set them all to false again so that we can then set things to true again and get the animation
 			setShowTimestamp(false);
 			setShowSeekBackwards(false);
-			setShowPause(false);
+			setShowPlay(false);
 			setShowPause(false);
 			setShowSpeed(false);
 
 			// slight setTimeout to get the state set on the next tick
-			setTimeout(() => {
+			showDebounceTimer = window.setTimeout(() => {
 				setShowTimestamp(true);
 				if (type === "seekForward") {
 					setShowSeekForward(true);
@@ -101,7 +99,6 @@ export const AppProvider: React.FC<{
 					setShowPause(false);
 				}, 500);
 				speedDebounceTimer = window.setTimeout(() => {
-					console.log("setting speed to false");
 					setShowSpeed(false);
 				}, 500);
 			}, 20);
@@ -112,7 +109,11 @@ export const AppProvider: React.FC<{
 		// Clean up the listener when the component unmounts
 		return () => {
 			eventEmitter.off("settingsUpdated", updateSettings);
+			eventEmitter.off("handleAction", handleShowTimestamp);
 			clearTimeout(timestampDebounceTimer);
+			clearTimeout(playPauseDebounceTimer);
+			clearTimeout(speedDebounceTimer);
+			clearTimeout(showDebounceTimer);
 		};
 	}, []);
 

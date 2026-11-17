@@ -7,7 +7,7 @@ A best-in-class video note-taking experience in Obsidian.
 Seamlessly capture and replay insights from YouTube videos, podcasts, and lectures into your knowledge base.
 
 -   **One-Click Save** - Instantly save from YouTube to Obsidian media note
--   **Media Hotkeys**:- Pause and skip forward/back while staying in your note
+-   **Media Hotkeys** - Pause and skip forward/back while staying in your note
 -   **Timestamps** - Insert clickable timestamp links to jump back to key moments
 -   **Resume Playback** - Resume videos from where you left off
 
@@ -29,10 +29,12 @@ Setup hotkeys to allow you to control the playback of the media you're taking no
 
 Hotkeys can be setup however you like through the Hotkeys settings page.
 Suggestion hotkeys for Mac users that mirror YouTube's hotkey layout:
-⌃J - Jump Backward
+⌃J - Rewind
 ⌃K - Play/Pause
-⌃L - Jump Forward
+⌃L - Fast Forward
 ⌃I - Insert Timestamp
+
+Other commands: `Speed up`, `Slow down` and `Toggle horizontal/vertical split`. Rewind and Fast Forward move by the `Rewind & fast forward seconds` setting.
 
 ## Inserting Timestamps
 
@@ -62,7 +64,19 @@ media_link: https://www.youtube.com/watch?v=MFXWY8TqSWw
 [02:01]() - A useful insight, ties to my thought that [[Connections are key to creativity.]]
 ```
 
-Media notes display an embedded player fixed in the note pane, so that the note content can be scrolled while viewing the player.
+Supported URL formats:
+
+-   `https://www.youtube.com/watch?v=<id>`
+-   `https://youtu.be/<id>`
+-   `https://www.youtube.com/shorts/<id>`
+-   `https://www.youtube.com/embed/<id>`
+-   `https://www.youtube.com/live/<id>`
+
+The legacy `media` property is read when `media_link` is empty or missing. A link without a video id shows no player.
+
+A `t=` parameter sets the start time. It accepts seconds (`t=90`) or `90s`, `1m30s` and `1h2m3s`. If the note has no saved position, playback starts at `t=` and autoplays. Otherwise it resumes from the saved position.
+
+Media notes display an embedded player fixed in the note pane, so that the note content can be scrolled while viewing the player. The player is added to the editor view, so it does not appear in Reading view.
 
 Timestamps are inserted into the note as markdown links with a timestamp format:
 `[3:05:53]()`
@@ -73,6 +87,13 @@ Clicking links that have the timestamp format (`HH:MM:SS`) will jump the playbac
 
 <a href="https://obsidian.md/plugins?id=media-notes"><img src="https://img.shields.io/badge/Install_now-6c31e3?logo=obsidian"></a><br>
 Search "Media Notes" in the Obsidian Community Plugins library to find this plugin and add it.
+
+### Manual installation / building from source
+
+Cloning the repo into `<vault>/.obsidian/plugins/` is not enough, because `main.js` is not committed. Either:
+
+-   Run `npm install` and `npm run build` in the cloned folder, then enable the plugin in Community plugins.
+-   Download `main.js`, `manifest.json` and `styles.css` from a GitHub release into `<vault>/.obsidian/plugins/media-notes/`, then enable the plugin.
 
 ## Roadmap
 

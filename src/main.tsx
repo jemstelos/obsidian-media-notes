@@ -1,4 +1,4 @@
-import { createRoot } from "react-dom/client";
+import { createRoot, Root } from "react-dom/client";
 import { MediaFrame, getVideoId } from "./components/media-frame";
 import { AppProvider } from "./app-context";
 import {
@@ -48,7 +48,7 @@ const DEFAULT_SETTINGS: MediaNotesPluginSettings = {
 	timestampOffsetSeconds: 6,
 	backgroundColor: "#000000",
 	progressBarColor: "#FF0000",
-	timestampTemplate: "[{ts}]({link})\n",
+	timestampTemplate: "[{ts}]({link}) ",
 	mediaData: {},
 };
 
@@ -87,6 +87,19 @@ const getMediaLinkFromFrontmatter = (frontmatter: Record<string, string>) => {
 	return frontmatter["media_link"] || frontmatter["media"];
 };
 
+// parses a url t= param ("90", "90s", "1m30s", "1h2m3s") into seconds, null if invalid
+const parseTimeParam = (t: string | null) => {
+	if (!t) return null;
+	if (/^\d+(\.\d+)?$/.test(t)) return Number(t);
+	const match = t.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/);
+	if (!match || !(match[1] || match[2] || match[3])) return null;
+	return (
+		Number(match[1] ?? 0) * 3600 +
+		Number(match[2] ?? 0) * 60 +
+		Number(match[3] ?? 0)
+	);
+};
+
 export default class MediaNotesPlugin extends Plugin {
 	settings: MediaNotesPluginSettings;
 
@@ -95,6 +108,7 @@ export default class MediaNotesPlugin extends Plugin {
 			ytRef: React.RefObject<YouTube>;
 			mediaLink: string;
 			eventEmitter: EventEmitter;
+			root: Root;
 		};
 	};
 
@@ -118,6 +132,7 @@ export default class MediaNotesPlugin extends Plugin {
 		player.ytRef.current?.internalPlayer
 			?.getCurrentTime()
 			.then((timestamp: number) => {
+				if (typeof timestamp !== "number") return;
 				const mediaId = getVideoId(player.mediaLink);
 				if (!mediaId) return;
 				this.settings.mediaData[mediaId] = {
@@ -125,18 +140,52 @@ export default class MediaNotesPlugin extends Plugin {
 					lastUpdated: new Date().toISOString(),
 					lastTimestampSeconds: timestamp,
 				};
-				this.saveSettings();
-				this.loadSettings();
+				return this.saveSettings();
+			})
+			.catch((error: unknown) => {
+				console.error("Media Notes: failed to save timestamp", error);
 			});
 	};
 
+	// saves the timestamp, then unmounts the player and removes its container
+	destroyPlayer = (playerId: string, playerContainer: Element) => {
+		// savePlayerTimestamp requests the current time before the player is unmounted
+		this.savePlayerTimestamp(playerId);
+		this.players[playerId]?.root.unmount();
+		delete this.players[playerId];
+		playerContainer.remove();
+	};
+
+	// removes the player from a view (if any) and resets the split layout
+	removePlayerFromView = (markdownView: MarkdownView) => {
+		const container = markdownView.containerEl;
+		const div = container.querySelector("." + mediaNotesContainerClass);
+		if (div) {
+			const playerId = div.getAttribute("data-player-id") ?? "";
+			this.destroyPlayer(playerId, div);
+		}
+		container.classList.remove(mediaParentContainerVerticalClass);
+	};
+
 	renderPlayerInView = (markdownView: MarkdownView) => {
-		// @ts-ignore TS2339
-		const frontmatter = (parseYaml(markdownView.rawFrontmatter) ??
-			{}) as Record<string, string>;
+		let frontmatter: Record<string, string> = {};
+		try {
+			// @ts-ignore TS2339
+			frontmatter = (parseYaml(markdownView.rawFrontmatter) ??
+				{}) as Record<string, string>;
+		} catch (e) {
+			// malformed frontmatter yaml, treat as no media link
+		}
+		const mediaLink = getMediaLinkFromFrontmatter(frontmatter);
+		// an invalid media link (not a url, not a string, no video id) is treated as no media link
+		const mediaId =
+			typeof mediaLink === "string" ? getVideoId(mediaLink) : null;
+		const container = markdownView.containerEl;
+		const markdownSourceview = container.querySelector(
+			".markdown-source-view"
+		);
 		// if there's a media_link
-		if (frontmatter && getMediaLinkFromFrontmatter(frontmatter)) {
-			const container = markdownView.containerEl;
+		if (mediaId && markdownSourceview) {
 			const existingPlayerComponent = container.querySelector(
 				"." + mediaNotesContainerClass
 			);
@@ -147,17 +196,11 @@ export default class MediaNotesPlugin extends Plugin {
 					"";
 				const player = this.players[playerId];
 				// If a player state object exists for this media link, don't re-render
-				if (
-					player &&
-					player.mediaLink ===
-						getMediaLinkFromFrontmatter(frontmatter)
-				) {
+				if (player && player.mediaLink === mediaLink) {
 					return;
 				}
 				// remove the existing player
-				existingPlayerComponent.remove();
-				this.savePlayerTimestamp(playerId);
-				delete this.players[playerId];
+				this.destroyPlayer(playerId, existingPlayerComponent);
 			}
 
 			const div = document.createElement("div");
@@ -169,9 +212,6 @@ export default class MediaNotesPlugin extends Plugin {
 			// name is important - matches data-player-id in getActiveViewYoutubePlayer
 			div.dataset.playerId = uniqueId;
 			div.style.background = this.settings.backgroundColor;
-			const markdownSourceview = container.querySelector(
-				".markdown-source-view"
-			);
 			if (this.settings.defaultSplitMode === "Vertical") {
 				div.style.width = this.settings.horizontalPlayerWidth + "%";
 				container.classList.add(mediaParentContainerVerticalClass);
@@ -180,19 +220,18 @@ export default class MediaNotesPlugin extends Plugin {
 				div.style.height = this.settings.verticalPlayerHeight + "%";
 			}
 
-			if (!markdownSourceview) return;
 			markdownSourceview.prepend(div);
 
-			const mediaLink = getMediaLinkFromFrontmatter(frontmatter);
 			const ytRef = React.createRef<YouTube>();
 			const eventEmitter = new EventEmitter();
+			const root = createRoot(div);
 			this.players[uniqueId] = {
 				ytRef,
 				mediaLink: mediaLink,
 				eventEmitter,
+				root,
 			};
 
-			const mediaId = getVideoId(mediaLink);
 			const mediaData =
 				(mediaId && this.settings.mediaData[mediaId]) ||
 				this.settings.mediaData[mediaLink];
@@ -200,17 +239,16 @@ export default class MediaNotesPlugin extends Plugin {
 			// extract the url param ts from the media link
 			const mediaLinkUrl = new URL(mediaLink);
 			const mediaLinkParams = new URLSearchParams(mediaLinkUrl.search);
-			const mediaLinkTs = mediaLinkParams.get("t");
+			const mediaLinkSeconds = parseTimeParam(mediaLinkParams.get("t"));
 			const initSeconds =
-				mediaData?.lastTimestampSeconds ?? mediaLinkTs ?? 0;
+				mediaData?.lastTimestampSeconds ?? mediaLinkSeconds ?? 0;
 
 			let autoplay = false;
 			// If the initial seconds came from the mediaLink, autoplay
-			if (mediaLinkTs && Number(initSeconds) === Number(mediaLinkTs)) {
+			if (mediaLinkSeconds !== null && initSeconds === mediaLinkSeconds) {
 				autoplay = true;
 			}
 
-			const root = createRoot(div);
 			root.render(
 				<>
 					<AppProvider
@@ -227,17 +265,8 @@ export default class MediaNotesPlugin extends Plugin {
 				</>
 			);
 		} else {
-			// if there's no media_link, cleanup
-			const container = markdownView.containerEl;
-			// cleanup existing players, and save timestamp
-			const div = container.querySelector("." + mediaNotesContainerClass);
-			if (div) {
-				// unmount
-				const playerId = div.getAttribute("data-player-id") ?? "";
-				this.savePlayerTimestamp(playerId);
-				delete this.players[playerId];
-				div.remove();
-			}
+			// if there's no media_link, cleanup existing players, and save timestamp
+			this.removePlayerFromView(markdownView);
 		}
 	};
 
@@ -264,8 +293,9 @@ export default class MediaNotesPlugin extends Plugin {
 		this.players = {};
 
 		this.app.workspace.getLeavesOfType("markdown").forEach((leaf) => {
-			const view = leaf.view as MarkdownView;
-			this.renderPlayerInView(view);
+			// deferred views (Obsidian 1.7.2+) are not MarkdownViews yet
+			if (!(leaf.view instanceof MarkdownView)) return;
+			this.renderPlayerInView(leaf.view);
 		});
 
 		// This adds a simple command that can be triggered anywhere
@@ -277,7 +307,7 @@ export default class MediaNotesPlugin extends Plugin {
 				if (!player || !player.ytRef) return;
 				const timestamp =
 					await player.ytRef.current?.internalPlayer?.getCurrentTime();
-				if (!timestamp) return;
+				if (typeof timestamp !== "number") return;
 				const offsetTimestamp =
 					timestamp - this.settings.timestampOffsetSeconds >= 0
 						? timestamp - this.settings.timestampOffsetSeconds
@@ -291,18 +321,17 @@ export default class MediaNotesPlugin extends Plugin {
 				const videoUrl =
 					await player.ytRef.current?.internalPlayer?.getVideoUrl();
 
-				if (videoUrl) {
-					// for some reason, the t= param is wrong in the videoUrl from getVidelUrl. fix it
-					const fixedVideoUrl = new URL(videoUrl);
-					fixedVideoUrl.searchParams.set(
-						"t",
-						Math.floor(offsetTimestamp).toString()
-					);
-					timestampSnippet = timestampSnippet.replace(
-						"{link}",
-						`${fixedVideoUrl}`
-					);
-				}
+				// for some reason, the t= param is wrong in the videoUrl from getVidelUrl. fix it
+				// fall back to the note's media link (already validated) if there's no video url
+				const fixedVideoUrl = new URL(videoUrl || player.mediaLink);
+				fixedVideoUrl.searchParams.set(
+					"t",
+					Math.floor(offsetTimestamp).toString()
+				);
+				timestampSnippet = timestampSnippet.replace(
+					"{link}",
+					`${fixedVideoUrl}`
+				);
 				timestampSnippet = timestampSnippet.replace(/\\n/g, "\n");
 				editor.replaceSelection(timestampSnippet);
 				if (this.settings.pauseOnTimestampInsert) {
@@ -349,7 +378,6 @@ export default class MediaNotesPlugin extends Plugin {
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				const player = this.getActiveViewYoutubePlayer(view);
 				if (!player || !player.ytRef) return;
-				console.log("toggle horizontal view");
 				const container = view.containerEl;
 				const existingPlayer = view.containerEl.querySelector(
 					"." + mediaNotesContainerClass
@@ -386,7 +414,7 @@ export default class MediaNotesPlugin extends Plugin {
 				if (!player || !player.ytRef) return;
 				const currentTime =
 					await player.ytRef.current?.internalPlayer?.getCurrentTime();
-				if (!currentTime) return;
+				if (typeof currentTime !== "number") return;
 				const newTime = currentTime + this.settings.seekSeconds;
 				player.ytRef.current
 					?.getInternalPlayer()
@@ -405,8 +433,11 @@ export default class MediaNotesPlugin extends Plugin {
 				if (!player || !player.ytRef) return;
 				const currentTime =
 					await player.ytRef.current?.internalPlayer?.getCurrentTime();
-				if (!currentTime) return;
-				const newTime = currentTime - this.settings.seekSeconds;
+				if (typeof currentTime !== "number") return;
+				const newTime = Math.max(
+					currentTime - this.settings.seekSeconds,
+					0
+				);
 				player.ytRef.current
 					?.getInternalPlayer()
 					?.seekTo(newTime, true);
@@ -484,23 +515,22 @@ export default class MediaNotesPlugin extends Plugin {
 					Object.keys(this.players).forEach((id) => {
 						this.savePlayerTimestamp(id);
 					});
-					return;
 				}
-				this.renderPlayerInView(markdownView);
+				this.app.workspace.getLeavesOfType("markdown").forEach((leaf) => {
+					if (!(leaf.view instanceof MarkdownView)) return;
+					this.renderPlayerInView(leaf.view);
+				});
 			})
 		);
 
 		this.registerEvent(
 			this.app.metadataCache.on("changed", (file) => {
-				const frontmatter =
-					this.app.metadataCache.getFileCache(file)?.frontmatter;
-				if (frontmatter && getMediaLinkFromFrontmatter(frontmatter)) {
-					// technically this may not be the same view as the file that changed
-					const markdownView =
-						this.app.workspace.getActiveViewOfType(MarkdownView);
-					if (!markdownView) return;
-					this.renderPlayerInView(markdownView);
-				}
+				// re-render the views of the changed file, which also cleans up if the media link was removed
+				this.app.workspace.getLeavesOfType("markdown").forEach((leaf) => {
+					if (!(leaf.view instanceof MarkdownView)) return;
+					if (leaf.view.file !== file) return;
+					this.renderPlayerInView(leaf.view);
+				});
 			})
 		);
 
@@ -524,27 +554,24 @@ export default class MediaNotesPlugin extends Plugin {
 	}
 
 	onunload() {
-		// if there's an active view, save the timestamp (for development hot reloading)
-		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-		if (!activeView) return;
-		const container = activeView.containerEl;
-
-		// cleanup existing players, and save timestamp
-		const div = container.querySelector("." + mediaNotesContainerClass);
-		if (div) {
-			// unmount
-			const playerId = div.getAttribute("data-player-id") ?? "";
-			console.log("save timestamp before reloading!");
-			this.savePlayerTimestamp(playerId);
-			delete this.players[playerId];
-			div.remove();
-		}
+		// cleanup the players in all views, and save their timestamps (also for development hot reloading)
+		this.app.workspace.getLeavesOfType("markdown").forEach((leaf) => {
+			if (!(leaf.view instanceof MarkdownView)) return;
+			this.removePlayerFromView(leaf.view);
+		});
+		// unmount any players whose view is already gone
+		Object.values(this.players ?? {}).forEach((player) => {
+			player.root.unmount();
+		});
+		this.players = {};
 	}
 
 	async loadSettings() {
+		// mediaData gets its own object so DEFAULT_SETTINGS is never mutated
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
+			{ mediaData: {} },
 			await this.loadData()
 		);
 	}
@@ -573,7 +600,7 @@ class SettingsTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Default split view")
 			.setDesc(
-				"Vertical or horizontal split view. Defaults to horizontal."
+				"Vertical or horizontal split view. Defaults to vertical."
 			)
 			.addDropdown((dropdown) => {
 				dropdown
