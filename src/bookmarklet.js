@@ -6,11 +6,14 @@ function createMediaNote() {
 		var videoId = new URLSearchParams(window.location.search).get("v");
 		if (videoId) {
 			var videoElement = document.querySelector("video");
-			var status = videoElement.paused ? "paused" : "playing";
-			if (status === "playing") {
-				videoElement.pause();
+			var timestamp = 0;
+			if (videoElement) {
+				var status = videoElement.paused ? "paused" : "playing";
+				if (status === "playing") {
+					videoElement.pause();
+				}
+				timestamp = videoElement.currentTime;
 			}
-			var timestamp = videoElement.currentTime;
 
 			var urlObj = new URL(url);
 			if (timestamp) {
@@ -32,7 +35,7 @@ function createMediaNote() {
 }
 
 const makeObsidianFriendly = (title) => {
-	var replacedTitle = "Video. " + title.replace(/[:/\\^|#]/g, ".");
+	var replacedTitle = "Video. " + title.replace(/[:/\\^|#?*"<>[\]]/g, ".");
 	return replacedTitle;
 };
 

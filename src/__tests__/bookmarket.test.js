@@ -13,4 +13,10 @@ describe("Bookmarklet - makeObsidianFriendly", () => {
 		const expected = "Video. Valid Title";
 		expect(makeObsidianFriendly(title)).toBe(expected);
 	});
+
+	test('should replace ? * " < > [ ] with "."', () => {
+		const title = 'What? "Best" <Ever> [Live] *new*';
+		const expected = "Video. What. .Best. .Ever. .Live. .new.";
+		expect(makeObsidianFriendly(title)).toBe(expected);
+	});
 });

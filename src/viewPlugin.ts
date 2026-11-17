@@ -1,8 +1,8 @@
-import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
+import { EditorView, ViewPlugin } from "@codemirror/view";
 
 class ClickHandlerPlugin {
 	view: EditorView;
-	handleTimestampClick: (ts: string) => boolean | undefined;
+	handleTimestampClick?: (ts: string) => boolean | undefined;
 
 	constructor(view: EditorView) {
 		this.view = view;
@@ -16,7 +16,7 @@ class ClickHandlerPlugin {
 			const timestampRegex = /^(\d+:)?[0-5]?\d:[0-5]\d$/;
 			if (!textContent) return;
 			if (timestampRegex.test(textContent)) {
-				const isHandled = this.handleTimestampClick(textContent);
+				const isHandled = this.handleTimestampClick?.(textContent);
 				if (isHandled) {
 					event.preventDefault();
 					event.stopPropagation();
@@ -25,11 +25,6 @@ class ClickHandlerPlugin {
 			// Add your custom logic here
 		}
 	};
-
-	update(update: ViewUpdate) {
-		update.view.dom.addEventListener("click", this.handleClick);
-		// This method is called whenever the view is updated
-	}
 
 	destroy() {
 		// This method is called when the plugin is no longer needed
